@@ -1,9 +1,15 @@
 
 import requests
 import json
+import argparse
 
-URL = "http://localhost:11434/api/chat"
-MODEL = "qwen2.5:3b"
+parser = argparse.ArgumentParser(description="Sensia: Assistant local")
+parser.add_argument("--model", default="qwen2.5:3b", help="...")
+parser.add_argument("--url", default="http://localhost:11434/api/chat", help="...")
+args = parser.parse_args()
+
+MODEL = args.model
+URL = args.url
 
 
 def chat(messages):
