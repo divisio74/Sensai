@@ -9,11 +9,11 @@ def run_python(code, timeo=10):
             timeout=timeo,
         )
     except (subprocess.TimeoutExpired):
-            return {"stdout": "",
-                "stderr": "Timeout for subprocesses",
-                "exit_code": 124,
-                "timed_out": True
-            }
+        return {"stdout": "",
+            "stderr": "Timeout for subprocesses",
+            "exit_code": 124,
+            "timed_out": True
+        }
     return {
         "stdout": resultat.stdout,
         "stderr": resultat.stderr,
