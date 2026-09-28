@@ -1,7 +1,6 @@
-
-import requests
-import json
 import argparse
+
+from core.llm import chat
 
 parser = argparse.ArgumentParser(description="Sensia: Assistant local")
 parser.add_argument("--model", default="qwen2.5:3b", help="...")
@@ -10,35 +9,6 @@ args = parser.parse_args()
 
 MODEL = args.model
 URL = args.url
-
-
-def chat(messages):
-    payload = {
-        "model": MODEL,
-        "messages": messages,
-        "stream": True,
-    }
-    try:
-        response = requests.post(URL, json=payload, stream=True)
-    except requests.exceptions.ConnectionError as e:
-        print("Server non joignable")
-        return None
-
-    if response.status_code != 200:
-        print("Bad url OR model ! : ", response.status_code)
-        return None
-
-
-
-    full_reply = ""
-    for line in response.iter_lines():
-        chunk = json.loads(line)
-        morceau = chunk["message"]["content"]
-        print(morceau, end="", flush=True)
-        full_reply += morceau
-    print()
-    return full_reply
-
 
 messages = []
 
@@ -57,7 +27,7 @@ while True:
 
     messages.append({"role": "user", "content": user_input})       # ⑥ un dict {role, content} — quel rôle ?
     print("Sensia: ", end="", flush=True)
-    reply = chat(messages)
+    reply = chat(messages, MODEL, URL)
     if reply is None:
         messages.pop()
         continue
