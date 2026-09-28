@@ -5,7 +5,7 @@ from tools.sandbox import run_python
 PROMPT = (
     "Tu es un générateur de code Python. "
     "Réponds UNIQUEMENT avec du code Python exécutable dans un bloc ```python. "
-    "Aucune explication, aucun texte avant ou après."
+    "Aucun commentaire ni explications, aucun texte avant ou après."
 )
 
 
@@ -29,8 +29,8 @@ def code_boucle(tache, model, url, max_iterations=3):
 
         print(f"\nÉchec : {resultat['stderr'][:300]}")
 
-        messages.append({"role": "assistant", "content": reponse})     # ② ce que le MODÈLE a produit
-        messages.append({"role": "user", "content":               # ③ ce que TOI tu lui dis
+        messages.append({"role": "assistant", "content": reponse})
+        messages.append({"role": "user", "content":
             f"Code error with execution :\n{resultat['stderr']}\n"
             f"fix it and return a corrected one"})
 
