@@ -3,7 +3,7 @@ import subprocess
 MAX_OUTPUT = 1500
 
 
-def contexte_limite(texte, maximum=MAX_OUTPUT, garder="fin"):
+def tronque_code_cycle(texte, maximum=MAX_OUTPUT, garder="fin"):
     if len(texte) <= maximum:
        return texte
     return "truncated start" + texte[-maximum:]
@@ -23,8 +23,8 @@ def run_python(code, timeo=10):
             "timed_out": True
         }
     return {
-        "stdout": contexte_limite(resultat.stdout),
-        "stderr": contexte_limite(resultat.stderr),
+        "stdout": tronque_code_cycle(resultat.stdout),
+        "stderr": tronque_code_cycle(resultat.stderr),
         "exit_code": resultat.returncode,
         "timed_out": False,
     }
