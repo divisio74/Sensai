@@ -16,7 +16,7 @@ def make_ast(code):
         return code
 
 
-def code_boucle(tache, model, url, max_iterations=3):
+def code_cycle(tache, model, url, max_iterations=3):
     messages = [
         {"role": "system", "content": PROMPT},
         {"role": "user",   "content": tache},
@@ -45,7 +45,7 @@ def code_boucle(tache, model, url, max_iterations=3):
         if resultat["exit_code"] == 0:
             print(f"\nSucceeded in {tentative} attempt(s)")
             print("Output:", resultat["stdout"])
-            return {"status": "success", "code": code, "tentatives": tentative}
+            return {"status": "success", "code": code, "tentatives": tentative, "stdout": resultat["stdout"]}
 
         print(f"\nFailure: {resultat['stderr'][:300]}")
 
