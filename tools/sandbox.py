@@ -1,5 +1,13 @@
 import subprocess
 
+MAX_OUTPUT = 1500
+
+
+def contexte_limite(texte, maximum=MAX_OUTPUT, garder="fin"):
+    if len(texte) <= maximum:
+       return texte
+    return "truncated start" + texte[-maximum:]
+
 def run_python(code, timeo=10):
     try:
         resultat = subprocess.run(
@@ -10,21 +18,16 @@ def run_python(code, timeo=10):
         )
     except (subprocess.TimeoutExpired):
         return {"stdout": "",
-            "stderr": "Timeout for subprocesses",
+            "stderr": f"Timeout: the code did not finish within {timeo} seconds. Retry with a lower algorithmic complexity",
             "exit_code": 124,
             "timed_out": True
         }
     return {
-        "stdout": resultat.stdout,
-        "stderr": resultat.stderr,
+        "stdout": contexte_limite(resultat.stdout),
+        "stderr": contexte_limite(resultat.stderr),
         "exit_code": resultat.returncode,
         "timed_out": False,
     }
 
 
-# testes facile pour la sandbox
-if __name__ == "__main__":
-    print("1)", run_python("print(2 + 2)"))
-    print("2)", run_python("print(x)"))
-    print("3)", run_python("while True: pass"))
 
