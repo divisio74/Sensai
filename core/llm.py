@@ -10,7 +10,7 @@ def chat(messages, model, url):
     try:
         response = requests.post(url, json=payload, stream=True)
     except requests.exceptions.ConnectionError:
-        print("Server non joignable")
+        print("Server unreachable")
         return None
 
     if response.status_code != 200:

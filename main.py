@@ -2,7 +2,7 @@ import argparse
 
 from core.llm import chat
 
-parser = argparse.ArgumentParser(description="Sensia: Assistant local")
+parser = argparse.ArgumentParser(description="Sensia: Local assistant")
 parser.add_argument("--model", default="qwen2.5:3b", help="...")
 parser.add_argument("--url", default="http://localhost:11434/api/chat", help="...")
 args = parser.parse_args()
@@ -14,9 +14,9 @@ messages = []
 
 while True:
     try:
-        user_input = input("Vous: ")
+        user_input = input("You: ")
     except (EOFError, KeyboardInterrupt):
-        print("\nSALAM le sang")
+        print("\nGoodbye")
         break
 
     if not user_input.strip():
@@ -25,11 +25,11 @@ while True:
     if user_input == "quit":
         break
 
-    messages.append({"role": "user", "content": user_input})       # ⑥ un dict {role, content} — quel rôle ?
+    messages.append({"role": "user", "content": user_input})
     print("Sensia: ", end="", flush=True)
     reply = chat(messages, MODEL, URL)
     if reply is None:
         messages.pop()
         continue
 
-    messages.append({"role": "assistant", "content": reply})       # ⑦ un dict {role, content} — quel rôle cette fois ?
+    messages.append({"role": "assistant", "content": reply})
