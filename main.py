@@ -1,7 +1,9 @@
 import argparse
+import requests
 
 from core.llm import chat
 from core.boucle import code_cycle
+
 
 def u_send_message_a(content, messages, model, url):
     messages.append({"role": "user", "content": content})
@@ -12,43 +14,71 @@ def u_send_message_a(content, messages, model, url):
         return
     messages.append({"role": "assistant", "content": reply})
 
-parser = argparse.ArgumentParser(description="Sensia: Local assistant")
-parser.add_argument("--model", default="qwen2.5:3b", help="...")
-parser.add_argument("--url", default="http://localhost:11434/api/chat", help="...")
-args = parser.parse_args()
 
-MODEL = args.model
-URL = args.url
+def parse_args():
+    parser = argparse.ArgumentParser(description="Sensia: Local assistant")
+    parser.add_argument("--model", default="qwen2.5:3b", help="...")
+    parser.add_argument("--url", default="http://localhost:11434/api/chat", help="...")
+    return parser.parse_args()
 
-messages = []
 
-while True:
+def check_ollama(model, url):
     try:
-        user_input = input("You: ")
-    except (EOFError, KeyboardInterrupt):
-        print("\nGoodbye")
-        break
+        response = requests.post(url, json={"model": model, "messages": []}, timeout=(5, 120))
+    except (requests.exceptions.ChunkedEncodingError, requests.exceptions.ConnectionError):
+        print("\nServer unreachable")
+        return None
+    except requests.exceptions.Timeout:
+        print("\nOllama stopped responding (timeout)")
+        return None
+    except requests.exceptions.RequestException as e:
+        print(f"\nInvalid request: {e}")
+        return None
+    if response.status_code != 200:
+        print("Bad url OR model ! : ", response.status_code)
+        return None
+    return True
 
-    if not user_input.strip():
-        continue
 
-    if user_input == "quit":
-        break
+def main():
+    args = parse_args()
+    model = args.model
+    url = args.url
 
-    if user_input.startswith("/code "):
-        task = user_input[len("/code "):]
-        if not task.strip():
-            print("Usage: /code <task>")
+    if not check_ollama(model, url):
+        return
+    messages = []
+
+    while True:
+        try:
+            user_input = input("You: ")
+        except (EOFError, KeyboardInterrupt):
+            print("\nGoodbye")
+            break
+
+        if not user_input.strip():
             continue
-        cc_output = code_cycle(task, MODEL, URL)
-        if cc_output["status"] == "success":
-            content = "Here is the code you need :" + cc_output["code"] + "and the result of his execution :" + cc_output["stdout"]
-            u_send_message_a(content, messages, MODEL, URL)
-            continue
-        else:
-            content = "Unfortunetely its impossible to do this actually ask me to remake my goals !"
-            u_send_message_a(content, messages, MODEL, URL)
-            continue
+
+        if user_input == "quit":
+            break
+
+        if user_input.startswith("/code "):
+            task = user_input[len("/code "):]
+            if not task.strip():
+                print("Usage: /code <task>")
+                continue
+            cc_output = code_cycle(task, model, url)
+            if cc_output["status"] == "success":
+                content = "Here is the code you need :" + cc_output["code"] + "and the result of his execution :" + cc_output["stdout"]
+                u_send_message_a(content, messages, model, url)
+                continue
+            else:
+                content = "Unfortunetely its impossible to do this actually ask me to remake my goals !"
+                u_send_message_a(content, messages, model, url)
+                continue
+
+        u_send_message_a(user_input, messages, model, url)
 
 
-    u_send_message_a(user_input, messages, MODEL, URL)
+if __name__ == "__main__":
+    main()

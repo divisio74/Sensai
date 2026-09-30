@@ -2,7 +2,6 @@ import subprocess
 
 MAX_OUTPUT = 1500
 
-
 def tronque_code_cycle(texte, maximum=MAX_OUTPUT, garder="fin"):
     if len(texte) <= maximum:
        return texte
