@@ -1,4 +1,5 @@
 import argparse
+import requests
 
 from core.llm import chat
 from core.boucle import code_cycle
@@ -21,10 +22,31 @@ def parse_args():
     return parser.parse_args()
 
 
+def check_ollama(model, url):
+    try:
+        response = requests.post(url, json={"model": model, "messages": []}, timeout=(5, 120))
+    except (requests.exceptions.ChunkedEncodingError, requests.exceptions.ConnectionError):
+        print("\nServer unreachable")
+        return None
+    except requests.exceptions.Timeout:
+        print("\nOllama stopped responding (timeout)")
+        return None
+    except requests.exceptions.RequestException as e:
+        print(f"\nInvalid request: {e}")
+        return None
+    if response.status_code != 200:
+        print("Bad url OR model ! : ", response.status_code)
+        return None
+    return True
+
+
 def main():
     args = parse_args()
     model = args.model
     url = args.url
+
+    if not check_ollama(model, url):
+        return
     messages = []
 
     while True:
