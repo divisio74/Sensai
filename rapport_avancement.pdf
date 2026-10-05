@@ -1,0 +1,535 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Count 5 /Kids [10 0 R 12 0 R 14 0 R 16 0 R 18 0 R] >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier /Encoding /WinAnsiEncoding >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique /Encoding /WinAnsiEncoding >>
+endobj
+7 0 obj
+<< /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R /F4 6 0 R >> >>
+endobj
+8 0 obj
+<< /Title (Sensia - Rapport d'avancement) /Producer (Sensia report) >>
+endobj
+9 0 obj
+<< /Length 7020 >>
+stream
+q 0.09 0.14 0.24 rg 0 642 595 200 re f Q
+q 0.11 0.6 0.55 rg 0 638 595 4 re f Q
+BT 1 1 1 rg /F2 46 Tf 40 754 Td (Sensia) Tj ET
+BT 0.84 0.95 0.93 rg /F1 20 Tf 40 722 Td (Rapport d'avancement du projet) Tj ET
+BT 0.66 0.71 0.78 rg /F1 10.5 Tf 40 694 Td (Assistant IA local en ligne de commande, avec un agent de) Tj ET
+BT 0.66 0.71 0.78 rg /F1 10.5 Tf 40 680 Td (code qui se corrige tout seul.) Tj ET
+BT 0.66 0.71 0.78 rg /F1 8.5 Tf 40 658 Td (G-AIA-500-LYN-5-1  |  sensai-4  |  \351tat du d\351p\364t au 5 octobre 2026) Tj ET
+q 0.66 0.71 0.78 RG 1.6 w 479 770.9 m 497.5 738.8 l S Q
+q 0.66 0.71 0.78 rg 501 732.8 m 494.8 737.3 l 500.3 740.4 l h f Q
+q 0.66 0.71 0.78 RG 1.6 w 491 712 m 454 712 l S Q
+q 0.66 0.71 0.78 rg 447 712 m 454 715.1 l 454 708.9 l h f Q
+q 0.66 0.71 0.78 RG 1.6 w 434 731.1 m 452.5 763.2 l S Q
+q 0.66 0.71 0.78 rg 456 769.2 m 455.2 761.6 l 449.8 764.7 l h f Q
+q 0.11 0.6 0.55 rg 487 790 m 487 800.5 478.5 809 468 809 c 457.5 809 449 800.5 449 790 c 449 779.5 457.5 771 468 771 c 478.5 771 487 779.5 487 790 c h f Q
+BT 1 1 1 rg /F2 9.5 Tf 456.9 786.5 Td (code) Tj ET
+q 0.23 0.44 0.85 rg 532 712 m 532 722.5 523.5 731 513 731 c 502.5 731 494 722.5 494 712 c 494 701.5 502.5 693 513 693 c 523.5 693 532 701.5 532 712 c h f Q
+BT 1 1 1 rg /F2 9.5 Tf 505.4 708.5 Td (run) Tj ET
+q 0.91 0.64 0.23 rg 442 712 m 442 722.5 433.5 731 423 731 c 412.5 731 404 722.5 404 712 c 404 701.5 412.5 693 423 693 c 433.5 693 442 701.5 442 712 c h f Q
+BT 1 1 1 rg /F2 9.5 Tf 417.4 708.5 Td (fix) Tj ET
+BT 0.66 0.71 0.78 rg /F4 8 Tf 456.2 734 Td (boucle) Tj ET
+BT 0.09 0.14 0.24 rg /F2 13 Tf 40 606 Td (En un coup d'oeil) Tj ET
+q 0.95 0.96 0.98 rg 0.95 0.96 0.98 RG 16 w 1 j 48 526 103 60 re B Q
+q 0.11 0.6 0.55 rg 40 518 5 76 re f Q
+BT 0.11 0.6 0.55 rg /F2 26 Tf 56 559 Td (5) Tj ET
+BT 0.12 0.16 0.22 rg /F2 9 Tf 56 541 Td (fichiers Python) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 56 529 Td (main.py + 4 modules) Tj ET
+q 0.95 0.96 0.98 rg 0.95 0.96 0.98 RG 16 w 1 j 180 526 103 60 re B Q
+q 0.23 0.44 0.85 rg 172 518 5 76 re f Q
+BT 0.23 0.44 0.85 rg /F2 26 Tf 188 559 Td (3) Tj ET
+BT 0.12 0.16 0.22 rg /F2 9 Tf 188 541 Td (tentatives max) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 188 529 Td (par t\342che /code) Tj ET
+q 0.95 0.96 0.98 rg 0.95 0.96 0.98 RG 16 w 1 j 312 526 103 60 re B Q
+q 0.91 0.64 0.23 rg 304 518 5 76 re f Q
+BT 0.91 0.64 0.23 rg /F2 26 Tf 320 559 Td (10 s) Tj ET
+BT 0.12 0.16 0.22 rg /F2 9 Tf 320 541 Td (timeout du sandbox) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 320 529 Td (code retour 124) Tj ET
+q 0.95 0.96 0.98 rg 0.95 0.96 0.98 RG 16 w 1 j 444 526 103 60 re B Q
+q 0.18 0.62 0.36 rg 436 518 5 76 re f Q
+BT 0.18 0.62 0.36 rg /F2 26 Tf 452 559 Td (0) Tj ET
+BT 0.12 0.16 0.22 rg /F2 9 Tf 452 541 Td (framework LLM) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 452 529 Td (HTTP direct vers Ollama) Tj ET
+BT 0.09 0.14 0.24 rg /F2 13 Tf 40 484 Td (Avancement par chantier) Tj ET
+q 0.18 0.62 0.36 rg 0.18 0.62 0.36 RG 8 w 1 j 45.5 462 92 6 re B Q
+q 0.18 0.62 0.36 rg 0.18 0.62 0.36 RG 8 w 1 j 148.5 462 92 6 re B Q
+q 0.18 0.62 0.36 rg 0.18 0.62 0.36 RG 8 w 1 j 251.5 462 92 6 re B Q
+q 0.9 0.91 0.92 rg 0.9 0.91 0.92 RG 8 w 1 j 354.5 462 92 6 re B Q
+q 0.9 0.91 0.92 rg 0.9 0.91 0.92 RG 8 w 1 j 457.5 462 92 6 re B Q
+q 0.91 0.64 0.23 rg 0.91 0.64 0.23 RG 8 w 1 j 354.5 462 42 6 re B Q
+BT 0.42 0.45 0.5 rg /F1 8.5 Tf 40 442 Td (3 chantiers termin\351s   |   1 partiel   |   1 \340 faire) Tj ET
+q 0.9 0.91 0.92 rg 0.9 0.91 0.92 RG 16 w 1 j 48 380 499 36 re B Q
+q 1 1 1 rg 1 1 1 RG 14 w 1 j 48 380 499 36 re B Q
+q 0.85 0.94 0.89 rg 0.85 0.94 0.89 RG 17.9 w 1 j 61 402.9 46.1 0.1 re B Q
+BT 0.18 0.62 0.36 rg /F2 7.5 Tf 67.1 399.5 Td (TERMIN\311) Tj ET
+BT 0.12 0.16 0.22 rg /F2 11 Tf 132 402 Td (Sandbox d'ex\351cution) Tj ET
+BT 0.42 0.45 0.5 rg /F4 8 Tf 471.4 402 Td (responsable : Pierre) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8.5 Tf 132 388 Td (run_python lance le code dans un sous-processus python3 avec un timeout de 10 s ; sorties tronqu\351es \340) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8.5 Tf 132 377.5 Td (1500 caract\350res.) Tj ET
+q 0.9 0.91 0.92 rg 0.9 0.91 0.92 RG 16 w 1 j 48 320 499 36 re B Q
+q 1 1 1 rg 1 1 1 RG 14 w 1 j 48 320 499 36 re B Q
+q 0.85 0.94 0.89 rg 0.85 0.94 0.89 RG 17.9 w 1 j 61 342.9 46.1 0.1 re B Q
+BT 0.18 0.62 0.36 rg /F2 7.5 Tf 67.1 339.5 Td (TERMIN\311) Tj ET
+BT 0.12 0.16 0.22 rg /F2 11 Tf 132 342 Td (Boucle de r\351flexion) Tj ET
+BT 0.42 0.45 0.5 rg /F4 8 Tf 471.4 342 Td (responsable : Pierre) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8.5 Tf 132 328 Td (code_cycle : g\351n\350re, ex\351cute, relit le vrai stderr et corrige ; d\351tecte les r\351p\351titions par comparaison) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8.5 Tf 132 317.5 Td (d'AST.) Tj ET
+q 0.9 0.91 0.92 rg 0.9 0.91 0.92 RG 16 w 1 j 48 260 499 36 re B Q
+q 1 1 1 rg 1 1 1 RG 14 w 1 j 48 260 499 36 re B Q
+q 0.85 0.94 0.89 rg 0.85 0.94 0.89 RG 17.9 w 1 j 61 282.9 46.1 0.1 re B Q
+BT 0.18 0.62 0.36 rg /F2 7.5 Tf 67.1 279.5 Td (TERMIN\311) Tj ET
+BT 0.12 0.16 0.22 rg /F2 11 Tf 132 282 Td (Refactor en modules) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8.5 Tf 132 268 Td (S\351paration des responsabilit\351s : main.py, core/ \(llm, boucle, code_extract\) et tools/ \(sandbox\).) Tj ET
+q 0.9 0.91 0.92 rg 0.9 0.91 0.92 RG 16 w 1 j 48 200 499 36 re B Q
+q 1 1 1 rg 1 1 1 RG 14 w 1 j 48 200 499 36 re B Q
+q 0.99 0.94 0.83 rg 0.99 0.94 0.83 RG 17.9 w 1 j 61 222.9 46.1 0.1 re B Q
+BT 0.91 0.64 0.23 rg /F2 7.5 Tf 68 219.5 Td (PARTIEL) Tj ET
+BT 0.12 0.16 0.22 rg /F2 11 Tf 132 222 Td (\311valuation + persistance) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8.5 Tf 132 208 Td (Mesures document\351es \(auto-correction, stagnation, format\). Persistance et m\351moire : pas encore) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8.5 Tf 132 197.5 Td (impl\351ment\351es.) Tj ET
+q 0.9 0.91 0.92 rg 0.9 0.91 0.92 RG 16 w 1 j 48 140 499 36 re B Q
+q 1 1 1 rg 1 1 1 RG 14 w 1 j 48 140 499 36 re B Q
+q 0.9 0.91 0.92 rg 0.9 0.91 0.92 RG 17.9 w 1 j 61 162.9 46.1 0.1 re B Q
+BT 0.12 0.16 0.22 rg /F2 7.5 Tf 69 159.5 Td (\300 FAIRE) Tj ET
+BT 0.12 0.16 0.22 rg /F2 11 Tf 132 162 Td (Tool calling \(recherche internet\)) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8.5 Tf 132 148 Td (Pas encore sur la branche main. Pr\351vu dans info.md comme premi\350re piste.) Tj ET
+BT 0.09 0.14 0.24 rg /F2 13 Tf 40 100 Td (Commandes disponibles) Tj ET
+q 0.09 0.14 0.24 rg 0.09 0.14 0.24 RG 8 w 1 j 44 79 162 6 re B Q
+BT 1 1 1 rg /F3 8 Tf 48 79 Td (texte libre) Tj ET
+BT 0.12 0.16 0.22 rg /F1 9 Tf 222 79 Td (conversation normale, affich\351e token par token) Tj ET
+q 0.09 0.14 0.24 rg 0.09 0.14 0.24 RG 8 w 1 j 44 63.5 162 6 re B Q
+BT 1 1 1 rg /F3 8 Tf 48 63.5 Td (/code <t\342che>) Tj ET
+BT 0.12 0.16 0.22 rg /F1 9 Tf 222 63.5 Td (lance l'agent de code auto-correcteur) Tj ET
+q 0.09 0.14 0.24 rg 0.09 0.14 0.24 RG 8 w 1 j 44 48 162 6 re B Q
+BT 1 1 1 rg /F3 8 Tf 48 48 Td (quit  |  Ctrl+C  |  Ctrl+D) Tj ET
+BT 0.12 0.16 0.22 rg /F1 9 Tf 222 48 Td (quitte proprement) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 40 22 Td (Sensia - rapport d'avancement - 5 octobre 2026) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 539.4 22 Td (1 / 5) Tj ET
+q 0.9 0.91 0.92 RG 0.8 w 40 34 m 555 34 l S Q
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources 7 0 R /Contents 9 0 R >>
+endobj
+11 0 obj
+<< /Length 5327 >>
+stream
+q 0.09 0.14 0.24 rg 0 796 595 46 re f Q
+BT 1 1 1 rg /F2 15 Tf 40 813 Td (Architecture) Tj ET
+BT 0.66 0.71 0.78 rg /F2 11 Tf 519.5 813 Td (Sensia) Tj ET
+q 0.11 0.6 0.55 rg 0 793 595 3 re f Q
+BT 0.42 0.45 0.5 rg /F1 8 Tf 40 22 Td (Sensia - rapport d'avancement - 5 octobre 2026) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 539.4 22 Td (2 / 5) Tj ET
+q 0.9 0.91 0.92 RG 0.8 w 40 34 m 555 34 l S Q
+BT 0.09 0.14 0.24 rg /F2 17 Tf 40 764 Td (Un fichier, une responsabilit\351) Tj ET
+BT 0.42 0.45 0.5 rg /F1 9.5 Tf 40 746 Td (Chaque appel au mod\350le est une requ\352te HTTP directe vers l'API Ollama : aucun framework LLM n'est utilis\351.) Tj ET
+q 0.9 0.91 0.92 rg 0.9 0.91 0.92 RG 14 w 1 j 209 683 176 18 re B Q
+BT 0.12 0.16 0.22 rg /F2 10.5 Tf 245.9 688 Td (Utilisateur \(terminal\)) Tj ET
+q 0.09 0.14 0.24 rg 0.09 0.14 0.24 RG 14 w 1 j 174 588 246 44 re B Q
+BT 1 1 1 rg /F2 10.5 Tf 277.2 612 Td (main.py) Tj ET
+BT 1 1 1 rg /F1 8 Tf 196.3 599 Td (CLI, historique de chat, aiguillage de la commande /code) Tj ET
+q 0.42 0.45 0.5 RG 1.5 w 297 676 m 297 646 l S Q
+q 0.42 0.45 0.5 rg 297 639 m 293.9 646 l 300.1 646 l h f Q
+BT 0.42 0.45 0.5 rg /F1 7.5 Tf 305 654 Td (texte | /code) Tj ET
+q 0.11 0.6 0.55 rg 0.11 0.6 0.55 RG 14 w 1 j 199 466 196 48 re B Q
+BT 1 1 1 rg /F2 10.5 Tf 259.9 492 Td (core/boucle.py) Tj ET
+BT 1 1 1 rg /F1 8 Tf 203.6 479 Td (code_cycle\(t\342che, model, url\) : la boucle de r\351flexion) Tj ET
+q 0.42 0.45 0.5 RG 1.5 w 297 581 m 297 528 l S Q
+q 0.42 0.45 0.5 rg 297 521 m 293.9 528 l 300.1 528 l h f Q
+BT 0.42 0.45 0.5 rg /F1 7.5 Tf 305 546 Td (code_cycle\(t\342che\)) Tj ET
+q 0.23 0.44 0.85 rg 0.23 0.44 0.85 RG 14 w 1 j 30 338 150 48 re B Q
+BT 1 1 1 rg /F2 10.5 Tf 77.3 364 Td (core/llm.py) Tj ET
+BT 1 1 1 rg /F1 8 Tf 44.8 351 Td (chat\(messages\) : transport HTTP,) Tj ET
+BT 1 1 1 rg /F1 8 Tf 69.9 341 Td (streaming NDJSON) Tj ET
+q 0.23 0.44 0.85 rg 0.23 0.44 0.85 RG 14 w 1 j 222 338 150 48 re B Q
+BT 1 1 1 rg /F2 10.5 Tf 244.5 364 Td (core/code_extract.py) Tj ET
+BT 1 1 1 rg /F1 8 Tf 234.1 351 Td (extract_code : isole le bloc ```python) Tj ET
+q 0.23 0.44 0.85 rg 0.23 0.44 0.85 RG 14 w 1 j 415 338 150 48 re B Q
+BT 1 1 1 rg /F2 10.5 Tf 446.8 364 Td (tools/sandbox.py) Tj ET
+BT 1 1 1 rg /F1 8 Tf 421 351 Td (run_python : sous-processus + timeout) Tj ET
+q 0.42 0.45 0.5 RG 1.5 w 167 610 m 46 610 l 46 400 l S Q
+q 0.42 0.45 0.5 rg 46 393 m 42.9 400 l 49.1 400 l h f Q
+BT 0.42 0.45 0.5 rg /F1 7.5 Tf 52 512 Td (chat\(messages\)) Tj ET
+q 0.42 0.45 0.5 RG 1.5 w 260 459 m 260 424 l 130 424 l 130 400 l S Q
+q 0.42 0.45 0.5 rg 130 393 m 126.8 400 l 133.2 400 l h f Q
+q 0.42 0.45 0.5 RG 1.5 w 297 459 m 297 400 l S Q
+q 0.42 0.45 0.5 rg 297 393 m 293.9 400 l 300.1 400 l h f Q
+q 0.42 0.45 0.5 RG 1.5 w 334 459 m 334 424 l 460 424 l 460 400 l S Q
+q 0.42 0.45 0.5 rg 460 393 m 456.9 400 l 463.1 400 l h f Q
+BT 0.42 0.45 0.5 rg /F1 7.5 Tf 200 430 Td (g\351n\350re) Tj ET
+BT 0.42 0.45 0.5 rg /F1 7.5 Tf 304 412 Td (extrait) Tj ET
+BT 0.42 0.45 0.5 rg /F1 7.5 Tf 420 430 Td (ex\351cute) Tj ET
+q 1 1 1 rg 0.42 0.45 0.5 RG 1.2 w [4 3] 0 d 30 217 m 180 217 l 183.9 217 187 220.1 187 224 c 187 260 l 187 263.9 183.9 267 180 267 c 30 267 l 26.1 267 23 263.9 23 260 c 23 224 l 23 220.1 26.1 217 30 217 c h B Q
+BT 0.12 0.16 0.22 rg /F2 10.5 Tf 87.5 244 Td (Ollama) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 54.1 231 Td (localhost:11434, qwen2.5:3b) Tj ET
+q 1 1 1 rg 0.42 0.45 0.5 RG 1.2 w [4 3] 0 d 415 217 m 565 217 l 568.9 217 572 220.1 572 224 c 572 260 l 572 263.9 568.9 267 565 267 c 415 267 l 411.1 267 408 263.9 408 260 c 408 224 l 408 220.1 411.1 217 415 217 c h B Q
+BT 0.12 0.16 0.22 rg /F2 10.5 Tf 446.2 244 Td (Processus enfant) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 456.9 231 Td (python3 -c <code>) Tj ET
+q 0.42 0.45 0.5 RG 1.5 w 105 331 m 105 274 l S Q
+q 0.42 0.45 0.5 rg 105 267 m 101.8 274 l 108.2 274 l h f Q
+q 0.42 0.45 0.5 RG 1.5 w 490 331 m 490 274 l S Q
+q 0.42 0.45 0.5 rg 490 267 m 486.9 274 l 493.1 274 l h f Q
+BT 0.42 0.45 0.5 rg /F1 7.5 Tf 113 294 Td (POST /api/chat) Tj ET
+BT 0.42 0.45 0.5 rg /F1 7.5 Tf 498 294 Td (subprocess.run) Tj ET
+BT 0.42 0.45 0.5 rg /F2 7.5 Tf 279.3 202 Td (EXTERNE) Tj ET
+q 0.9 0.91 0.92 RG 0.8 w [3 3] 0 d 30 272 m 565 272 l S Q
+q 0.09 0.14 0.24 rg 0.09 0.14 0.24 RG 6 w 1 j 43 143 6 6 re B Q
+BT 0.12 0.16 0.22 rg /F1 8.5 Tf 58 142 Td (Point d'entr\351e) Tj ET
+q 0.11 0.6 0.55 rg 0.11 0.6 0.55 RG 6 w 1 j 135.4 143 6 6 re B Q
+BT 0.12 0.16 0.22 rg /F1 8.5 Tf 150.4 142 Td (Logique de l'agent) Tj ET
+q 0.23 0.44 0.85 rg 0.23 0.44 0.85 RG 6 w 1 j 244.9 143 6 6 re B Q
+BT 0.12 0.16 0.22 rg /F1 8.5 Tf 259.9 142 Td (Transport et outils) Tj ET
+q 1 1 1 rg 0.42 0.45 0.5 RG 1 w [3 2] 0 d 352.9 140 m 358.9 140 l 360.6 140 361.9 141.3 361.9 143 c 361.9 149 l 361.9 150.7 360.6 152 358.9 152 c 352.9 152 l 351.3 152 349.9 150.7 349.9 149 c 349.9 143 l 349.9 141.3 351.3 140 352.9 140 c h B Q
+BT 0.12 0.16 0.22 rg /F1 8.5 Tf 367.9 142 Td (Externe) Tj ET
+q 0.84 0.95 0.93 rg 0.84 0.95 0.93 RG 16 w 1 j 48 66 499 46 re B Q
+q 0.11 0.6 0.55 rg 40 58 5 62 re f Q
+BT 0.09 0.14 0.24 rg /F2 10.5 Tf 58 100 Td (Le m\351canisme tient en une id\351e) Tj ET
+BT 0.12 0.16 0.22 rg /F1 9 Tf 58 85 Td (Tout passe par une seule liste de messages {role, content}. Le r\351sultat d'un outil n'est pas un objet sp\351cial : c'est un) Tj ET
+BT 0.12 0.16 0.22 rg /F1 9 Tf 58 73 Td (message de plus dans la conversation.) Tj ET
+endstream
+endobj
+12 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources 7 0 R /Contents 11 0 R >>
+endobj
+13 0 obj
+<< /Length 5961 >>
+stream
+q 0.09 0.14 0.24 rg 0 796 595 46 re f Q
+BT 1 1 1 rg /F2 15 Tf 40 813 Td (La boucle de r\351flexion) Tj ET
+BT 0.66 0.71 0.78 rg /F2 11 Tf 519.5 813 Td (Sensia) Tj ET
+q 0.11 0.6 0.55 rg 0 793 595 3 re f Q
+BT 0.42 0.45 0.5 rg /F1 8 Tf 40 22 Td (Sensia - rapport d'avancement - 5 octobre 2026) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 539.4 22 Td (3 / 5) Tj ET
+q 0.9 0.91 0.92 RG 0.8 w 40 34 m 555 34 l S Q
+BT 0.09 0.14 0.24 rg /F2 17 Tf 40 764 Td (Corriger \340 partir de faits, pas d'opinions) Tj ET
+BT 0.42 0.45 0.5 rg /F1 9.5 Tf 40 746 Td (Le signal de correction est le stderr r\351el de l'interpr\351teur, pas l'auto-critique d'un petit mod\350le.) Tj ET
+q 0.09 0.14 0.24 rg 0.09 0.14 0.24 RG 27.9 w 1 j 183.9 714 112.1 0.1 re B Q
+BT 1 1 1 rg /F2 9.5 Tf 191.9 710 Td (T\342che  /code <t\342che>) Tj ET
+q 0.42 0.45 0.5 RG 1.4 w 240 700 m 240 681 l S Q
+q 0.42 0.45 0.5 rg 240 674 m 236.8 681 l 243.2 681 l h f Q
+q 0.11 0.6 0.55 rg 0.11 0.6 0.55 RG 14 w 1 j 142 641 196 26 re B Q
+BT 1 1 1 rg /F2 10.5 Tf 200.3 656 Td (G\351n\351rer le code) Tj ET
+BT 1 1 1 rg /F1 8 Tf 174.9 643 Td (le LLM r\351pond dans un bloc ```python) Tj ET
+q 0.42 0.45 0.5 RG 1.4 w 240 634 m 240 613 l S Q
+q 0.42 0.45 0.5 rg 240 606 m 236.8 613 l 243.2 613 l h f Q
+q 0.23 0.44 0.85 rg 0.23 0.44 0.85 RG 14 w 1 j 142 581 196 18 re B Q
+BT 1 1 1 rg /F2 10.5 Tf 200.9 586 Td (Extraire le code) Tj ET
+q 0.42 0.45 0.5 RG 1.4 w 240 574 m 240 549 l S Q
+q 0.42 0.45 0.5 rg 240 542 m 236.8 549 l 243.2 549 l h f Q
+q 0.99 0.94 0.83 rg 0.91 0.64 0.23 RG 1.4 w 240 542 m 340 510 l 240 478 l 140 510 l h B Q
+BT 0.12 0.16 0.22 rg /F2 9 Tf 193.2 506.5 Td (M\352me AST qu'avant ?) Tj ET
+q 0.85 0.34 0.29 RG 1.4 w 340 510 m 385 510 l S Q
+q 0.85 0.34 0.29 rg 392 510 m 385 506.9 l 385 513.1 l h f Q
+BT 0.85 0.34 0.29 rg /F2 8 Tf 351 516 Td (oui) Tj ET
+q 0.85 0.34 0.29 rg 0.85 0.34 0.29 RG 14 w 1 j 399 490 126 40 re B Q
+BT 1 1 1 rg /F2 10.5 Tf 423.2 512 Td (Autre approche) Tj ET
+BT 1 1 1 rg /F1 8 Tf 407.7 499 Td (on le dit au mod\350le ; ex\351cution) Tj ET
+BT 1 1 1 rg /F1 8 Tf 450 489 Td (saut\351e) Tj ET
+q 0.18 0.62 0.36 RG 1.4 w 240 478 m 240 445 l S Q
+q 0.18 0.62 0.36 rg 240 438 m 236.8 445 l 243.2 445 l h f Q
+BT 0.18 0.62 0.36 rg /F2 8 Tf 247 456 Td (non) Tj ET
+q 0.23 0.44 0.85 rg 0.23 0.44 0.85 RG 14 w 1 j 142 405 196 26 re B Q
+BT 1 1 1 rg /F2 10.5 Tf 217.8 420 Td (Ex\351cuter) Tj ET
+BT 1 1 1 rg /F1 8 Tf 188 407 Td (sous-processus, timeout 10 s) Tj ET
+q 0.42 0.45 0.5 RG 1.4 w 240 398 m 240 365 l S Q
+q 0.42 0.45 0.5 rg 240 358 m 236.8 365 l 243.2 365 l h f Q
+q 0.99 0.94 0.83 rg 0.91 0.64 0.23 RG 1.4 w 240 358 m 340 326 l 240 294 l 140 326 l h B Q
+BT 0.12 0.16 0.22 rg /F2 9 Tf 205 322.5 Td (exit_code == 0 ?) Tj ET
+q 0.85 0.34 0.29 RG 1.4 w 340 326 m 385 326 l S Q
+q 0.85 0.34 0.29 rg 392 326 m 385 322.9 l 385 329.1 l h f Q
+BT 0.85 0.34 0.29 rg /F2 8 Tf 351 332 Td (non) Tj ET
+q 0.85 0.34 0.29 rg 0.85 0.34 0.29 RG 14 w 1 j 399 306 126 40 re B Q
+BT 1 1 1 rg /F2 10.5 Tf 420.3 328 Td (R\351injecter stderr) Tj ET
+BT 1 1 1 rg /F1 8 Tf 413.3 315 Td (comme message utilisateur) Tj ET
+q 0.18 0.62 0.36 RG 1.4 w 240 294 m 240 257 l S Q
+q 0.18 0.62 0.36 rg 240 250 m 236.8 257 l 243.2 257 l h f Q
+BT 0.18 0.62 0.36 rg /F2 8 Tf 247 268 Td (oui) Tj ET
+q 0.18 0.62 0.36 rg 0.18 0.62 0.36 RG 14 w 1 j 142 217 196 26 re B Q
+BT 1 1 1 rg /F2 10.5 Tf 221.6 232 Td (Succ\350s) Tj ET
+BT 1 1 1 rg /F1 8 Tf 182.9 219 Td (status = success : code + stdout) Tj ET
+q 0.85 0.34 0.29 RG 1.5 w 532 510 m 556 510 l 556 654 l S Q
+q 0.85 0.34 0.29 RG 1.5 w 532 326 m 556 326 l 556 510 l S Q
+q 0.85 0.34 0.29 RG 1.5 w 556 654 m 354 654 l S Q
+q 0.85 0.34 0.29 rg 347 654 m 354 657.1 l 354 650.9 l h f Q
+BT 0.85 0.34 0.29 rg /F4 7.5 Tf 522 580 Td (on repart) Tj ET
+BT 0.85 0.34 0.29 rg /F4 7.5 Tf 507.8 570 Td (\(max 3 tours\)) Tj ET
+q 0.95 0.96 0.98 rg 0.95 0.96 0.98 RG 12 w 1 j 46 484 66 52 re B Q
+BT 0.42 0.45 0.5 rg /F1 7.2 Tf 46 529 Td (Compare ast.dump :) Tj ET
+BT 0.42 0.45 0.5 rg /F1 7.2 Tf 46 520 Td (ignore espaces,) Tj ET
+BT 0.42 0.45 0.5 rg /F1 7.2 Tf 46 511 Td (retours \340 la ligne et) Tj ET
+BT 0.42 0.45 0.5 rg /F1 7.2 Tf 46 502 Td (commentaires.) Tj ET
+q 0.95 0.96 0.98 rg 0.95 0.96 0.98 RG 12 w 1 j 46 380 66 52 re B Q
+BT 0.42 0.45 0.5 rg /F1 7.2 Tf 46 425 Td (Un process enfant) Tj ET
+BT 0.42 0.45 0.5 rg /F1 7.2 Tf 46 416 Td (peut \352tre tu\351 par) Tj ET
+BT 0.42 0.45 0.5 rg /F1 7.2 Tf 46 407 Td (l'OS, ce qu'exec\(\)) Tj ET
+BT 0.42 0.45 0.5 rg /F1 7.2 Tf 46 398 Td (ne permet pas.) Tj ET
+q 0.95 0.96 0.98 rg 0.95 0.96 0.98 RG 12 w 1 j 46 300 66 52 re B Q
+BT 0.42 0.45 0.5 rg /F1 7.2 Tf 46 345 Td (0 = le code n'a pas) Tj ET
+BT 0.42 0.45 0.5 rg /F1 7.2 Tf 46 336 Td (plant\351, pas) Tj ET
+BT 0.42 0.45 0.5 rg /F1 7.2 Tf 46 327 Td (forc\351ment qu'il est) Tj ET
+BT 0.42 0.45 0.5 rg /F1 7.2 Tf 46 318 Td (juste.) Tj ET
+BT 0.09 0.14 0.24 rg /F2 13 Tf 40 174 Td (Trois issues possibles) Tj ET
+q 0.85 0.94 0.89 rg 0.85 0.94 0.89 RG 16 w 1 j 48 78 148 76 re B Q
+q 0.18 0.62 0.36 rg 40 157 164 5 re f Q
+BT 0.12 0.16 0.22 rg /F3 11 Tf 52 136 Td (success) Tj ET
+BT 0.12 0.16 0.22 rg /F1 8.5 Tf 52 120 Td (Le code s'ex\351cute sans erreur. Le) Tj ET
+BT 0.12 0.16 0.22 rg /F1 8.5 Tf 52 109 Td (r\351sultat est r\351inject\351 dans le chat.) Tj ET
+q 0.97 0.86 0.85 rg 0.97 0.86 0.85 RG 16 w 1 j 224 78 148 76 re B Q
+q 0.85 0.34 0.29 rg 216 157 164 5 re f Q
+BT 0.12 0.16 0.22 rg /F3 11 Tf 228 136 Td (failed) Tj ET
+BT 0.12 0.16 0.22 rg /F1 8.5 Tf 228 120 Td (3 tentatives \351puis\351es : le mod\350le doit) Tj ET
+BT 0.12 0.16 0.22 rg /F1 8.5 Tf 228 109 Td (revoir l'objectif avec l'utilisateur.) Tj ET
+q 0.99 0.94 0.83 rg 0.99 0.94 0.83 RG 16 w 1 j 400 78 148 76 re B Q
+q 0.91 0.64 0.23 rg 392 157 164 5 re f Q
+BT 0.12 0.16 0.22 rg /F3 11 Tf 404 136 Td (unavailable) Tj ET
+BT 0.12 0.16 0.22 rg /F1 8.5 Tf 404 120 Td (Ollama ne r\351pond pas : ce n'est pas) Tj ET
+BT 0.12 0.16 0.22 rg /F1 8.5 Tf 404 109 Td (la faute du mod\350le, il faut relancer le) Tj ET
+BT 0.12 0.16 0.22 rg /F1 8.5 Tf 404 98 Td (serveur.) Tj ET
+endstream
+endobj
+14 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources 7 0 R /Contents 13 0 R >>
+endobj
+15 0 obj
+<< /Length 6289 >>
+stream
+q 0.09 0.14 0.24 rg 0 796 595 46 re f Q
+BT 1 1 1 rg /F2 15 Tf 40 813 Td (Mesures) Tj ET
+BT 0.66 0.71 0.78 rg /F2 11 Tf 519.5 813 Td (Sensia) Tj ET
+q 0.11 0.6 0.55 rg 0 793 595 3 re f Q
+BT 0.42 0.45 0.5 rg /F1 8 Tf 40 22 Td (Sensia - rapport d'avancement - 5 octobre 2026) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 539.4 22 Td (4 / 5) Tj ET
+q 0.9 0.91 0.92 RG 0.8 w 40 34 m 555 34 l S Q
+BT 0.09 0.14 0.24 rg /F2 17 Tf 40 764 Td (Ce qui a \351t\351 mesur\351) Tj ET
+q 0.95 0.96 0.98 rg 0.95 0.96 0.98 RG 16 w 1 j 48 636 499 102 re B Q
+BT 0.09 0.14 0.24 rg /F2 11 Tf 54 725 Td (Auto-correction : fib\(42\) r\351cursif na\357f) Tj ET
+BT 0.18 0.62 0.36 rg /F2 9 Tf 415.4 725 Td (succ\350s en 3 tentatives, 36,8 s) Tj ET
+q 0.85 0.34 0.29 rg 0.85 0.34 0.29 RG 10 w 1 j 59 687 120.3 16 re B Q
+q 0.85 0.34 0.29 rg 0.85 0.34 0.29 RG 10 w 1 j 191.3 687 120.3 16 re B Q
+q 0.11 0.6 0.55 rg 0.11 0.6 0.55 RG 10 w 1 j 323.7 687 212.3 16 re B Q
+BT 1 1 1 rg /F2 8.5 Tf 95.4 691 Td (timeout 10 s) Tj ET
+BT 1 1 1 rg /F2 8.5 Tf 227.7 691 Td (timeout 10 s) Tj ET
+BT 1 1 1 rg /F2 8.5 Tf 378 691 Td (mod\350le + ex\351cution finale) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 54 666 Td (0 s) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 519.2 666 Td (36,8 s) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8.3 Tf 54 650 Td (Les deux premiers essais atteignent le timeout de 10 s ; le message d'erreur invite le mod\350le \340 r\351duire la complexit\351, et au troisi\350me) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8.3 Tf 54 639.6 Td (essai il passe \340 la m\351mo\357sation et r\351ussit. Le reste du temps correspond aux appels au mod\350le.) Tj ET
+q 0.95 0.96 0.98 rg 0.95 0.96 0.98 RG 16 w 1 j 48 512 235.5 96 re B Q
+BT 0.09 0.14 0.24 rg /F2 11 Tf 54 595 Td (D\351tection de stagnation) Tj ET
+q 0.9 0.91 0.92 rg 0.9 0.91 0.92 RG 8 w 1 j 58 570 153.5 6 re B Q
+q 0.42 0.45 0.5 rg 0.42 0.45 0.5 RG 8 w 1 j 58 570 153.5 6 re B Q
+BT 1 1 1 rg /F2 8 Tf 60 569.7 Td (sans d\351tection) Tj ET
+BT 0.12 0.16 0.22 rg /F2 8.5 Tf 223.5 569.7 Td (3 ex\351cutions) Tj ET
+q 0.9 0.91 0.92 rg 0.9 0.91 0.92 RG 8 w 1 j 58 548 153.5 6 re B Q
+q 0.11 0.6 0.55 rg 0.11 0.6 0.55 RG 8 w 1 j 58 548 45.8 6 re B Q
+BT 0.12 0.16 0.22 rg /F2 8 Tf 60 547.7 Td (avec) Tj ET
+BT 0.12 0.16 0.22 rg /F2 8.5 Tf 223.5 547.7 Td (1 ex\351cution) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 54 526 Td (Stub de chat qui renvoie toujours le m\352me code : run_python) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 54 516 Td (n'est appel\351 qu'une fois.) Tj ET
+q 0.95 0.96 0.98 rg 0.95 0.96 0.98 RG 16 w 1 j 311.5 512 235.5 96 re B Q
+BT 0.09 0.14 0.24 rg /F2 11 Tf 317.5 595 Td (Format du prompt \(6 essais\)) Tj ET
+q 0.9 0.91 0.92 rg 0.9 0.91 0.92 RG 8 w 1 j 321.5 570 153.5 6 re B Q
+q 0.23 0.44 0.85 rg 0.23 0.44 0.85 RG 8 w 1 j 321.5 570 153.5 6 re B Q
+BT 1 1 1 rg /F2 8 Tf 323.5 569.7 Td (FR) Tj ET
+BT 0.12 0.16 0.22 rg /F2 8.5 Tf 487 569.7 Td (6 / 6) Tj ET
+q 0.9 0.91 0.92 rg 0.9 0.91 0.92 RG 8 w 1 j 321.5 548 153.5 6 re B Q
+q 0.11 0.6 0.55 rg 0.11 0.6 0.55 RG 8 w 1 j 321.5 548 153.5 6 re B Q
+BT 1 1 1 rg /F2 8 Tf 323.5 547.7 Td (EN) Tj ET
+BT 0.12 0.16 0.22 rg /F2 8.5 Tf 487 547.7 Td (6 / 6) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 317.5 526 Td (Aucun \351cart mesurable : le choix de la langue du prompt s'est) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 317.5 516 Td (fait sur la lisibilit\351.) Tj ET
+q 0.95 0.96 0.98 rg 0.95 0.96 0.98 RG 16 w 1 j 48 408 499 76 re B Q
+BT 0.09 0.14 0.24 rg /F2 11 Tf 54 471 Td (Fen\352tre de contexte effective) Tj ET
+q 0.9 0.91 0.92 rg 0.9 0.91 0.92 RG 8 w 1 j 58 448 369 6 re B Q
+q 0.91 0.64 0.23 rg 0.91 0.64 0.23 RG 8 w 1 j 58 448 39.1 6 re B Q
+BT 0.12 0.16 0.22 rg /F2 8 Tf 60 447.7 Td (4096) Tj ET
+BT 0.12 0.16 0.22 rg /F2 8.5 Tf 439 447.7 Td (ollama ps) Tj ET
+q 0.9 0.91 0.92 rg 0.9 0.91 0.92 RG 8 w 1 j 58 426 369 6 re B Q
+q 0.42 0.45 0.5 rg 0.42 0.45 0.5 RG 8 w 1 j 58 426 369 6 re B Q
+BT 1 1 1 rg /F2 8 Tf 60 425.7 Td (32768) Tj ET
+BT 0.12 0.16 0.22 rg /F2 8.5 Tf 439 425.7 Td (capacit\351 du mod\350le) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 54 410 Td (D'o\371 la troncature des sorties \340 1500 caract\350res, en gardant la fin \(l'erreur d'une traceback est sur la derni\350re ligne\).) Tj ET
+BT 0.09 0.14 0.24 rg /F2 13 Tf 40 374 Td (Exemple de session \(extrait du README\)) Tj ET
+q 0.09 0.14 0.24 rg 0.09 0.14 0.24 RG 18 w 1 j 49 175 497 178 re B Q
+q 0.85 0.34 0.29 rg 62 347 m 62 349.2 60.2 351 58 351 c 55.8 351 54 349.2 54 347 c 54 344.8 55.8 343 58 343 c 60.2 343 62 344.8 62 347 c h f Q
+q 0.91 0.64 0.23 rg 76 347 m 76 349.2 74.2 351 72 351 c 69.8 351 68 349.2 68 347 c 68 344.8 69.8 343 72 343 c 74.2 343 76 344.8 76 347 c h f Q
+q 0.18 0.62 0.36 rg 90 347 m 90 349.2 88.2 351 86 351 c 83.8 351 82 349.2 82 347 c 82 344.8 83.8 343 86 343 c 88.2 343 90 344.8 90 347 c h f Q
+BT 0.66 0.71 0.78 rg /F1 8 Tf 253 344 Td (sensia - python3 main.py) Tj ET
+BT 1 1 1 rg /F3 9 Tf 56 318 Td (You: /code sort [3,1,2] without using sorted\(\) and print the result) Tj ET
+BT 0.66 0.71 0.78 rg /F3 9 Tf 56 303.5 Td (===== Attempt 1/3 =====) Tj ET
+BT 0.66 0.71 0.78 rg /F3 9 Tf 56 289 Td (...) Tj ET
+BT 0.49 0.88 0.64 rg /F3 9 Tf 56 274.5 Td (Succeeded in 1 attempt\(s\)) Tj ET
+BT 0.49 0.88 0.64 rg /F3 9 Tf 56 260 Td (Output: [1, 2, 3]) Tj ET
+BT 1 1 1 rg /F3 9 Tf 56 245.5 Td () Tj ET
+BT 1 1 1 rg /F3 9 Tf 56 231 Td (You: explain what you just did) Tj ET
+BT 0.56 0.76 1 rg /F3 9 Tf 56 216.5 Td (Sensia: This code implements a bubble sort...) Tj ET
+BT 0.66 0.71 0.78 rg /F1 8.3 Tf 54 192 Td (Le r\351sultat de /code est r\351inject\351 dans l'historique : l'assistant peut ensuite parler d'un code produit dans une conversation s\351par\351e.) Tj ET
+BT 0.09 0.14 0.24 rg /F2 13 Tf 40 142 Td (Synth\350se) Tj ET
+q 0.95 0.96 0.98 rg 40 110 515 17 re f Q
+BT 0.12 0.16 0.22 rg /F2 9 Tf 50 115 Td (Auto-correction fib\(42\) na\357f) Tj ET
+BT 0.12 0.16 0.22 rg /F1 9 Tf 300 115 Td (succ\350s en 3 tentatives, 36,8 s) Tj ET
+BT 0.12 0.16 0.22 rg /F2 9 Tf 50 98 Td (D\351tection de stagnation) Tj ET
+BT 0.12 0.16 0.22 rg /F1 9 Tf 300 98 Td (run_python appel\351 1x au lieu de 3x) Tj ET
+q 0.95 0.96 0.98 rg 40 76 515 17 re f Q
+BT 0.12 0.16 0.22 rg /F2 9 Tf 50 81 Td (Prompt FR vs EN) Tj ET
+BT 0.12 0.16 0.22 rg /F1 9 Tf 300 81 Td (6/6 contre 6/6) Tj ET
+BT 0.12 0.16 0.22 rg /F2 9 Tf 50 64 Td (Contexte effectif) Tj ET
+BT 0.12 0.16 0.22 rg /F1 9 Tf 300 64 Td (4096 tokens pour 32768 de capacit\351) Tj ET
+endstream
+endobj
+16 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources 7 0 R /Contents 15 0 R >>
+endobj
+17 0 obj
+<< /Length 8508 >>
+stream
+q 0.09 0.14 0.24 rg 0 796 595 46 re f Q
+BT 1 1 1 rg /F2 15 Tf 40 813 Td (D\351cisions et suite) Tj ET
+BT 0.66 0.71 0.78 rg /F2 11 Tf 519.5 813 Td (Sensia) Tj ET
+q 0.11 0.6 0.55 rg 0 793 595 3 re f Q
+BT 0.42 0.45 0.5 rg /F1 8 Tf 40 22 Td (Sensia - rapport d'avancement - 5 octobre 2026) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 539.4 22 Td (5 / 5) Tj ET
+q 0.9 0.91 0.92 RG 0.8 w 40 34 m 555 34 l S Q
+BT 0.09 0.14 0.24 rg /F2 17 Tf 40 764 Td (D\351cisions techniques cl\351s) Tj ET
+q 0.95 0.96 0.98 rg 0.95 0.96 0.98 RG 16 w 1 j 48 678 235.5 62 re B Q
+q 0.11 0.6 0.55 rg 40 670 5 78 re f Q
+q 0.11 0.6 0.55 rg 74 726 m 74 731.5 69.5 736 64 736 c 58.5 736 54 731.5 54 726 c 54 720.5 58.5 716 64 716 c 69.5 716 74 720.5 74 726 c h f Q
+BT 1 1 1 rg /F2 10 Tf 61.2 722 Td (1) Tj ET
+BT 0.09 0.14 0.24 rg /F2 10 Tf 82 722 Td (subprocess, pas exec\(\)) Tj ET
+BT 0.12 0.16 0.22 rg /F1 8.3 Tf 56 702 Td (Un process enfant se tue : timeout, variables prot\351g\351es,) Tj ET
+BT 0.12 0.16 0.22 rg /F1 8.3 Tf 56 691.5 Td (stdout et stderr s\351par\351s.) Tj ET
+q 0.95 0.96 0.98 rg 0.95 0.96 0.98 RG 16 w 1 j 311.5 678 235.5 62 re B Q
+q 0.23 0.44 0.85 rg 303.5 670 5 78 re f Q
+q 0.23 0.44 0.85 rg 337.5 726 m 337.5 731.5 333 736 327.5 736 c 322 736 317.5 731.5 317.5 726 c 317.5 720.5 322 716 327.5 716 c 333 716 337.5 720.5 337.5 726 c h f Q
+BT 1 1 1 rg /F2 10 Tf 324.7 722 Td (2) Tj ET
+BT 0.09 0.14 0.24 rg /F2 10 Tf 345.5 722 Td (R\351flexion ancr\351e dans l'ex\351cution) Tj ET
+BT 0.12 0.16 0.22 rg /F1 8.3 Tf 319.5 702 Td (Le feedback est le vrai stderr, un fait. Un mod\350le 3B juge) Tj ET
+BT 0.12 0.16 0.22 rg /F1 8.3 Tf 319.5 691.5 Td (mal son propre travail.) Tj ET
+q 0.95 0.96 0.98 rg 0.95 0.96 0.98 RG 16 w 1 j 48 590 235.5 62 re B Q
+q 0.91 0.64 0.23 rg 40 582 5 78 re f Q
+q 0.91 0.64 0.23 rg 74 638 m 74 643.5 69.5 648 64 648 c 58.5 648 54 643.5 54 638 c 54 632.5 58.5 628 64 628 c 69.5 628 74 632.5 74 638 c h f Q
+BT 1 1 1 rg /F2 10 Tf 61.2 634 Td (3) Tj ET
+BT 0.09 0.14 0.24 rg /F2 10 Tf 82 634 Td (Contrat de retour uniforme) Tj ET
+BT 0.12 0.16 0.22 rg /F1 8.3 Tf 56 614 Td (run_python renvoie toujours {stdout, stderr, exit_code,) Tj ET
+BT 0.12 0.16 0.22 rg /F1 8.3 Tf 56 603.5 Td (timed_out}, y compris sur timeout \(124\).) Tj ET
+q 0.95 0.96 0.98 rg 0.95 0.96 0.98 RG 16 w 1 j 311.5 590 235.5 62 re B Q
+q 0.18 0.62 0.36 rg 303.5 582 5 78 re f Q
+q 0.18 0.62 0.36 rg 337.5 638 m 337.5 643.5 333 648 327.5 648 c 322 648 317.5 643.5 317.5 638 c 317.5 632.5 322 628 327.5 628 c 333 628 337.5 632.5 337.5 638 c h f Q
+BT 1 1 1 rg /F2 10 Tf 324.7 634 Td (4) Tj ET
+BT 0.09 0.14 0.24 rg /F2 10 Tf 345.5 634 Td (Prompt et parsing) Tj ET
+BT 0.12 0.16 0.22 rg /F1 8.3 Tf 319.5 614 Td (Le prompt demande un bloc python ; extract_code rattrape) Tj ET
+BT 0.12 0.16 0.22 rg /F1 8.3 Tf 319.5 603.5 Td (les \351carts, avec repli sur le texte brut.) Tj ET
+q 0.95 0.96 0.98 rg 0.95 0.96 0.98 RG 16 w 1 j 48 502 235.5 62 re B Q
+q 0.11 0.6 0.55 rg 40 494 5 78 re f Q
+q 0.11 0.6 0.55 rg 74 550 m 74 555.5 69.5 560 64 560 c 58.5 560 54 555.5 54 550 c 54 544.5 58.5 540 64 540 c 69.5 540 74 544.5 74 550 c h f Q
+BT 1 1 1 rg /F2 10 Tf 61.2 546 Td (5) Tj ET
+BT 0.09 0.14 0.24 rg /F2 10 Tf 82 546 Td (AST plut\364t que bytecode) Tj ET
+BT 0.12 0.16 0.22 rg /F1 8.3 Tf 56 526 Td (ast.dump ignore espaces et commentaires. Le bytecode du) Tj ET
+BT 0.12 0.16 0.22 rg /F1 8.3 Tf 56 515.5 Td (module est identique pour deux fonctions diff\351rentes : rejet\351.) Tj ET
+q 0.95 0.96 0.98 rg 0.95 0.96 0.98 RG 16 w 1 j 311.5 502 235.5 62 re B Q
+q 0.23 0.44 0.85 rg 303.5 494 5 78 re f Q
+q 0.23 0.44 0.85 rg 337.5 550 m 337.5 555.5 333 560 327.5 560 c 322 560 317.5 555.5 317.5 550 c 317.5 544.5 322 540 327.5 540 c 333 540 337.5 544.5 337.5 550 c h f Q
+BT 1 1 1 rg /F2 10 Tf 324.7 546 Td (6) Tj ET
+BT 0.09 0.14 0.24 rg /F2 10 Tf 345.5 546 Td (Escalade avant abandon) Tj ET
+BT 0.12 0.16 0.22 rg /F1 8.3 Tf 319.5 526 Td (Au premier doublon on demande une autre approche au) Tj ET
+BT 0.12 0.16 0.22 rg /F1 8.3 Tf 319.5 515.5 Td (mod\350le ; l'ex\351cution est saut\351e.) Tj ET
+BT 0.09 0.14 0.24 rg /F2 13 Tf 40 470 Td (Limites connues \(assum\351es\)) Tj ET
+q 0.85 0.34 0.29 rg 51.2 451 m 51.2 452.8 49.8 454.2 48 454.2 c 46.2 454.2 44.8 452.8 44.8 451 c 44.8 449.2 46.2 447.8 48 447.8 c 49.8 447.8 51.2 449.2 51.2 451 c h f Q
+BT 0.12 0.16 0.22 rg /F2 9 Tf 58 447.5 Td (Probl\350me de l'oracle) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8.5 Tf 58 436 Td (exit_code == 0 prouve que le code n'a pas plant\351, pas qu'il est correct.) Tj ET
+q 0.85 0.34 0.29 rg 51.2 416.5 m 51.2 418.3 49.8 419.7 48 419.7 c 46.2 419.7 44.8 418.3 44.8 416.5 c 44.8 414.7 46.2 413.3 48 413.3 c 49.8 413.3 51.2 414.7 51.2 416.5 c h f Q
+BT 0.12 0.16 0.22 rg /F2 9 Tf 58 413 Td (Sandbox du processus, pas du syst\350me) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8.5 Tf 58 401.5 Td (le code g\351n\351r\351 peut \351crire sur le disque ou ouvrir le r\351seau.) Tj ET
+q 0.85 0.34 0.29 rg 51.2 382 m 51.2 383.8 49.8 385.2 48 385.2 c 46.2 385.2 44.8 383.8 44.8 382 c 44.8 380.2 46.2 378.8 48 378.8 c 49.8 378.8 51.2 380.2 51.2 382 c h f Q
+BT 0.12 0.16 0.22 rg /F2 9 Tf 58 378.5 Td (T\342ches contradictoires) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8.5 Tf 58 367 Td (ex. fib\(42\) en r\351cursion na\357ve : le mod\350le oscille entre la contrainte et le retour d'ex\351cution.) Tj ET
+q 0.85 0.34 0.29 rg 51.2 347.5 m 51.2 349.3 49.8 350.7 48 350.7 c 46.2 350.7 44.8 349.3 44.8 347.5 c 44.8 345.7 46.2 344.3 48 344.3 c 49.8 344.3 51.2 345.7 51.2 347.5 c h f Q
+BT 0.12 0.16 0.22 rg /F2 9 Tf 58 344 Td (Petit mod\350le) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8.5 Tf 58 332.5 Td (qwen2.5:3b est rapide sur CPU mais fragile ; --model permet de changer sans toucher au code.) Tj ET
+BT 0.09 0.14 0.24 rg /F2 13 Tf 40 308 Td (Prochaines \351tapes) Tj ET
+q 0.91 0.64 0.23 rg 0.91 0.64 0.23 RG 16 w 1 j 48 258 147.7 30 re B Q
+q 1 1 1 rg 1 1 1 RG 13.2 w 1 j 48 258 147.7 30 re B Q
+q 0.91 0.64 0.23 rg 0.91 0.64 0.23 RG 4 w 1 j 52 279 4 4 re B Q
+BT 0.12 0.16 0.22 rg /F2 9.5 Tf 64 277 Td (Tool calling) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 50 263 Td (recherche internet en premier) Tj ET
+q 0.91 0.64 0.23 rg 0.91 0.64 0.23 RG 16 w 1 j 223.7 258 147.7 30 re B Q
+q 1 1 1 rg 1 1 1 RG 13.2 w 1 j 223.7 258 147.7 30 re B Q
+q 0.91 0.64 0.23 rg 0.91 0.64 0.23 RG 4 w 1 j 227.7 279 4 4 re B Q
+BT 0.12 0.16 0.22 rg /F2 9.5 Tf 239.7 277 Td (Persistance) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 225.7 263 Td (entre sessions + m\351morisation) Tj ET
+q 0.91 0.64 0.23 rg 0.91 0.64 0.23 RG 16 w 1 j 399.3 258 147.7 30 re B Q
+q 1 1 1 rg 1 1 1 RG 13.2 w 1 j 399.3 258 147.7 30 re B Q
+q 0.91 0.64 0.23 rg 0.91 0.64 0.23 RG 4 w 1 j 403.3 279 4 4 re B Q
+BT 0.12 0.16 0.22 rg /F2 9.5 Tf 415.3 277 Td (\311valuation) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 401.3 263 Td (tests fournis par l'utilisateur \(oracle\)) Tj ET
+q 0.42 0.45 0.5 rg 0.42 0.45 0.5 RG 16 w 1 j 48 202 147.7 30 re B Q
+q 1 1 1 rg 1 1 1 RG 13.2 w 1 j 48 202 147.7 30 re B Q
+q 0.42 0.45 0.5 rg 0.42 0.45 0.5 RG 4 w 1 j 52 223 4 4 re B Q
+BT 0.12 0.16 0.22 rg /F2 9.5 Tf 64 221 Td (Fichier de config) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 50 207 Td (en plus des arguments CLI) Tj ET
+q 0.42 0.45 0.5 rg 0.42 0.45 0.5 RG 16 w 1 j 223.7 202 147.7 30 re B Q
+q 1 1 1 rg 1 1 1 RG 13.2 w 1 j 223.7 202 147.7 30 re B Q
+q 0.42 0.45 0.5 rg 0.42 0.45 0.5 RG 4 w 1 j 227.7 223 4 4 re B Q
+BT 0.12 0.16 0.22 rg /F2 9.5 Tf 239.7 221 Td (Sortie structur\351e) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 225.7 207 Td (sch\351ma JSON contraint) Tj ET
+q 0.42 0.45 0.5 rg 0.42 0.45 0.5 RG 16 w 1 j 399.3 202 147.7 30 re B Q
+q 1 1 1 rg 1 1 1 RG 13.2 w 1 j 399.3 202 147.7 30 re B Q
+q 0.42 0.45 0.5 rg 0.42 0.45 0.5 RG 4 w 1 j 403.3 223 4 4 re B Q
+BT 0.12 0.16 0.22 rg /F2 9.5 Tf 415.3 221 Td (Compaction du contexte) Tj ET
+BT 0.42 0.45 0.5 rg /F1 8 Tf 401.3 207 Td (l'historique grossit sans limite) Tj ET
+q 0.91 0.64 0.23 rg 0.91 0.64 0.23 RG 4 w 1 j 42 182 4 4 re B Q
+BT 0.42 0.45 0.5 rg /F1 8 Tf 54 180 Td (prioritaire \(info.md\)) Tj ET
+q 0.42 0.45 0.5 rg 0.42 0.45 0.5 RG 4 w 1 j 162 182 4 4 re B Q
+BT 0.42 0.45 0.5 rg /F1 8 Tf 174 180 Td (non impl\351ment\351 pour l'instant \(README\)) Tj ET
+q 0.09 0.14 0.24 rg 0.09 0.14 0.24 RG 20 w 1 j 50 66 495 50 re B Q
+BT 0.84 0.95 0.93 rg /F2 12 Tf 58 102 Td (Bilan) Tj ET
+BT 1 1 1 rg /F1 9 Tf 58 85 Td (Le coeur de l'agent \(g\351n\351rer, ex\351cuter, corriger\) fonctionne de bout en bout et a \351t\351 mesur\351. Les prochaines priorit\351s) Tj ET
+BT 1 1 1 rg /F1 9 Tf 58 73 Td (sont le tool calling, la persistance et un oracle externe pour v\351rifier la justesse du code.) Tj ET
+endstream
+endobj
+18 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources 7 0 R /Contents 17 0 R >>
+endobj
+xref
+0 19
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000144 00000 n 
+0000000241 00000 n 
+0000000343 00000 n 
+0000000438 00000 n 
+0000000543 00000 n 
+0000000616 00000 n 
+0000000702 00000 n 
+0000007774 00000 n 
+0000007879 00000 n 
+0000013259 00000 n 
+0000013365 00000 n 
+0000019379 00000 n 
+0000019485 00000 n 
+0000025827 00000 n 
+0000025933 00000 n 
+0000034494 00000 n 
+trailer
+<< /Size 19 /Root 1 0 R /Info 8 0 R >>
+startxref
+34600
+%%EOF
