@@ -5,7 +5,7 @@ from tools.internet_search import internet_search
 
 class InternetSearchTest(unittest.TestCase):
     def test_api_returns_results(self):
-        results = internet_search("latest Python release")
+        results = internet_search("comment installer python sur windows")
 
         self.assertIsInstance(results, list)
         self.assertGreater(len(results), 0)

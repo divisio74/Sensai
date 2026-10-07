@@ -32,5 +32,6 @@ def internet_search(query):
 
     sources = result["data"]["webPages"]["value"]
     for source in sources:
-        print(f"- {source['name']}: {source['url']}")
+        print(f"- {source['name']}: {source['url']}\n text: {source['text']}\n")
+        print("----------------------------------------------------\n")
     return sources
