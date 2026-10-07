@@ -3,7 +3,6 @@ import os
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-
 def internet_search(query):
     api_key = os.getenv("LANGSEARCH_API_KEY")
     if not api_key:
@@ -31,7 +30,4 @@ def internet_search(query):
         raise RuntimeError(f"Unable to reach LangSearch: {error}") from error
 
     sources = result["data"]["webPages"]["value"]
-    for source in sources:
-        print(f"- {source['name']}: {source['url']}\n text: {source['text']}\n")
-        print("----------------------------------------------------\n")
-    return sources
+    return sources 

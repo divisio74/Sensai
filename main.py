@@ -1,9 +1,11 @@
 import argparse
 import requests
+from dotenv import load_dotenv
 
 from core.llm import chat
 from core.boucle import code_cycle
 from core.persona import load_persona, build_system_prompt
+from tools.internet_search import internet_search
 
 
 def u_send_message_a(content, messages, model, url):
@@ -42,6 +44,7 @@ def check_ollama(model, url):
 
 
 def main():
+    load_dotenv()
     args = parse_args()
     model = args.model
     url = args.url
@@ -79,6 +82,20 @@ def main():
                 content = "Unfortunetely its impossible to do this actually ask me to remake my goals !"
                 u_send_message_a(content, messages, model, url)
                 continue
+        if user_input.startswith("/internet_search "):
+            query = user_input[len("/internet_search "):]
+            if not query.strip():
+                print("Usage: /internet_search <query>")
+                continue
+            results = internet_search(query)
+            if not results:
+                print("No results found.")
+                continue
+            content = "Here are the top search results:\n"
+            for source in results:
+                content += f"- {source['name']}: {source['url']}\n"
+            u_send_message_a(content, messages, model, url)
+            continue
 
         u_send_message_a(user_input, messages, model, url)
 

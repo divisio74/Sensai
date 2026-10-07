@@ -48,6 +48,7 @@ python3 tests/main.py
 |---|---|
 | any text | normal conversation, streamed token by token |
 | `/code <task>` | runs the self-correcting code agent on `<task>` |
+| `/internet_search <query>` | searches the web and feeds the results to agent |
 | `quit` | exits |
 | `Ctrl+C` / `Ctrl+D` | exits cleanly |
 
