@@ -4,6 +4,7 @@ import requests
 from core.llm import chat
 from core.boucle import code_cycle
 from core.persona import load_persona, build_system_prompt
+from rag.ingest import ingest
 
 
 def u_send_message_a(content, messages, model, url):
@@ -79,6 +80,11 @@ def main():
                 content = "Unfortunetely its impossible to do this actually ask me to remake my goals !"
                 u_send_message_a(content, messages, model, url)
                 continue
+
+        if user_input.startswith("/rag"):
+            chunks = ingest()
+            print(f"{len(chunks)} chunks indexed")
+            continue
 
         u_send_message_a(user_input, messages, model, url)
 
