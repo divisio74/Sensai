@@ -14,12 +14,16 @@ No LLM framework is used. Every call to the model is a direct HTTP request to th
 
 - Python 3.10+ (developed on 3.12)
 - [Ollama](https://ollama.com) running locally
-- `requests`
+- A LangSearch API key
+- `requests` and `python-dotenv`
 
 ```bash
 pip install -r requirements.txt
 ollama pull qwen2.5:3b
 ```
+
+Set `LANGSEARCH_API_KEY` in a `.env` file at the project root. The test runner loads this file
+with `python-dotenv`.
 
 ## Running
 
@@ -28,6 +32,14 @@ python3 main.py
 python3 main.py --model qwen2.5:7b #not the default model
 python3 main.py --url http://other-host:11434/api/chat
 python3 main.py --help
+```
+
+## Tests
+
+The LangSearch integration test can be launched independently:
+
+```bash
+python3 tests/main.py
 ```
 
 ## Usage
