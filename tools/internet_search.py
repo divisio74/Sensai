@@ -3,6 +3,7 @@ import os
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
+
 def internet_search(query):
     api_key = os.getenv("LANGSEARCH_API_KEY")
     if not api_key:
@@ -12,9 +13,8 @@ def internet_search(query):
         "https://api.langsearch.com/v1/web-search",
         data=json.dumps({
             "query": query,
-            "count": 5,
+            "count": 50,
             "contents": {"text": True},
-            "freshness": "noLimit",
         }).encode(),
         headers={
             "Authorization": f"Bearer {api_key}",
@@ -30,4 +30,13 @@ def internet_search(query):
         raise RuntimeError(f"Unable to reach LangSearch: {error}") from error
 
     sources = result["data"]["webPages"]["value"]
-    return sources 
+    return json.dumps([
+        {
+            "name": source.get("name", ""),
+            "url": source.get("url", ""),
+            "text": source.get("text", ""),
+            "datePublished": source.get("datePublished", ""),
+            "displayUrl": source.get("displayUrl", ""),
+        }
+        for source in sources
+    ], ensure_ascii=False)

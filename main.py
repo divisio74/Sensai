@@ -1,4 +1,5 @@
 import argparse
+import json
 import requests
 from dotenv import load_dotenv
 
@@ -88,13 +89,10 @@ def main():
                 print("Usage: /internet_search <query>")
                 continue
             results = internet_search(query)
-            if not results:
+            if not results or not json.loads(results):
                 print("No results found.")
                 continue
-            content = "Here are the top search results:\n"
-            for source in results:
-                content += f"- {source['name']}: {source['url']}\n"
-            u_send_message_a(content, messages, model, url)
+            u_send_message_a(query + "\n find the best answer among these results:\n" + results, messages, model, url)
             continue
 
         u_send_message_a(user_input, messages, model, url)
