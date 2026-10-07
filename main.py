@@ -11,12 +11,33 @@ from tools.internet_search import internet_search
 
 def u_send_message_a(content, messages, model, url):
     messages.append({"role": "user", "content": content})
-    print("Sensia: ", end="", flush=True)
-    reply = chat(messages, model, url)
-    if reply is None:
-        messages.pop()
-        return
-    messages.append({"role": "assistant", "content": reply})
+    while True:
+        print("Sensia: ", end="", flush=True)
+        reply = chat(messages, model, url)
+        if reply is None:
+            messages.pop()
+            return
+        messages.append({"role": "assistant", "content": reply})
+
+        try:
+            clean_reply = reply.strip("` \n")
+            if clean_reply.startswith("json"):
+                clean_reply = clean_reply[4:].strip()
+            parsed = json.loads(clean_reply)
+            if isinstance(parsed, list) and parsed and all(isinstance(x, str) for x in parsed):
+                results_text = ""
+                for query in parsed:
+                    print(f"\n[Internet search: {query}]")
+                    try:
+                        res = internet_search(query)
+                        results_text += f"Results for '{query}':\n{res}\n"
+                    except Exception as e:
+                        results_text += f"Error searching '{query}': {e}\n"
+                messages.append({"role": "user", "content": f"Here are the search results:\n{results_text}\nNow answer the user."})
+                continue
+        except Exception:
+            pass
+        break
 
 
 def parse_args():
