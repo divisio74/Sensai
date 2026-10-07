@@ -3,6 +3,7 @@ import requests
 
 from core.llm import chat
 from core.boucle import code_cycle
+from core.persona import load_persona, build_system_prompt
 
 
 def u_send_message_a(content, messages, model, url):
@@ -47,7 +48,9 @@ def main():
 
     if not check_ollama(model, url):
         return
-    messages = []
+    persona_text = load_persona("sensia")
+    system_message = build_system_prompt(persona_text)
+    messages = [system_message]
 
     while True:
         try:
