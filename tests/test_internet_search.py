@@ -5,12 +5,10 @@ from tools.internet_search import internet_search
 
 class InternetSearchTest(unittest.TestCase):
     def test_api_returns_results(self):
-        results = internet_search("comment installer python sur windows")
+        results = internet_search("donne moi du code python pour faire du visuel web")
 
-        self.assertIsInstance(results, list)
+        self.assertIsInstance(results, str)
         self.assertGreater(len(results), 0)
-        self.assertIn("name", results[0])
-        self.assertIn("url", results[0])
 
 
 if __name__ == "__main__":
