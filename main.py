@@ -8,6 +8,8 @@ from core.boucle import code_cycle
 from core.persona import load_persona, build_system_prompt
 from rag.ingest import ingest
 from tools.internet_search import internet_search
+from rag.embed import embed_chunks
+from rag.store import save_index, load_index
 
 
 def u_send_message_a(content, messages, model, url):
@@ -117,9 +119,22 @@ def main():
             u_send_message_a(query + "\n find the best answer among these results:\n" + results, messages, model, url)
             continue
 
-        if user_input.startswith("/rag"):
+        if user_input == "/index":
             chunks = ingest()
-            print(f"{len(chunks)} chunks indexed")
+            if not chunks:
+                print("No documents found in knowledge/")
+                continue
+            if not embed_chunks(chunks):
+                continue
+            save_index(chunks)
+            print(f"chunks indexed: {len(chunks)}")
+            continue
+        if user_input.startswith("/rag"):
+            chunks = load_index()
+            if chunks is None:
+                print("No index found, run /index first")
+                continue
+            print(f"chunks loaded : {len(chunks)}")
             continue
 
         u_send_message_a(user_input, messages, model, url)
