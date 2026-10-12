@@ -6,7 +6,11 @@ from dotenv import load_dotenv
 from core.llm import chat
 from core.boucle import code_cycle
 from core.persona import load_persona, build_system_prompt
+from rag.ingest import ingest
 from tools.internet_search import internet_search
+from rag.embed import embed_chunks
+from rag.store import save_index
+from rag.retrieve import retrieve, build_prompt
 
 
 MAX_SEARCH_ROUNDS = 3
@@ -127,6 +131,32 @@ def main():
                 print("No results found.")
                 continue
             u_send_message_a(query + "\n find the best answer among these results:\n" + results, messages, model, url)
+            continue
+
+        if user_input == "/index":
+            chunks = ingest()
+            if not chunks:
+                print("No documents found in knowledge/")
+                continue
+            if not embed_chunks(chunks):
+                continue
+            save_index(chunks)
+            continue
+        if user_input.startswith("/rag"):
+            question = user_input[len("/rag"):].strip()
+            if not question:
+                print("Usage: /rag <question>")
+                continue
+            results = retrieve(question, model, url)
+            if results is None:
+                continue
+            if not results:
+                print("Nothing relevant found in the documents")
+                continue
+            prompt = build_prompt(question, results)
+            u_send_message_a(prompt, messages, model, url)
+            for chunk in results:
+                print(f"Sources: {chunk['source']} - line {chunk['line']} - score {chunk['score']:.2f}")
             continue
 
         u_send_message_a(user_input, messages, model, url)

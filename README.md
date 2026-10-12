@@ -20,6 +20,8 @@ No LLM framework is used. Every call to the model is a direct HTTP request to th
 ```bash
 pip install -r requirements.txt
 ollama pull qwen2.5:3b
+ollama pull nomic-embed-text
+
 ```
 
 Set `LANGSEARCH_API_KEY` in a `.env` file at the project root. The test runner loads this file
