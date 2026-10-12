@@ -5,14 +5,14 @@ from dotenv import load_dotenv
 
 from core.llm import chat
 from core.boucle import code_cycle
-from core.persona import load_persona, build_system_prompt
+from core.persona import load_persona, build_system_prompt, get_persona_name
 from tools.internet_search import internet_search
 
 
-def u_send_message_a(content, messages, model, url):
+def u_send_message_a(content, messages, model, url, name):
     messages.append({"role": "user", "content": content})
     while True:
-        print("Sensia: ", end="", flush=True)
+        print(f"{name}: ", end="", flush=True)
         reply = chat(messages, model, url)
         if reply is None:
             messages.pop()
@@ -73,7 +73,9 @@ def main():
 
     if not check_ollama(model, url):
         return
-    persona_text = load_persona("sensia")
+    persona_id = "sensia"
+    persona_name = get_persona_name(persona_id)
+    persona_text = load_persona(persona_id)
     system_message = build_system_prompt(persona_text)
     messages = [system_message]
 
@@ -98,11 +100,11 @@ def main():
             cc_output = code_cycle(task, model, url)
             if cc_output["status"] == "success":
                 content = "Here is the code you need :" + cc_output["code"] + "and the result of his execution :" + cc_output["stdout"]
-                u_send_message_a(content, messages, model, url)
+                u_send_message_a(content, messages, model, url, persona_name)
                 continue
             else:
                 content = "Unfortunetely its impossible to do this actually ask me to remake my goals !"
-                u_send_message_a(content, messages, model, url)
+                u_send_message_a(content, messages, model, url, persona_name)
                 continue
         if user_input.startswith("/internet_search "):
             query = user_input[len("/internet_search "):]
@@ -113,10 +115,10 @@ def main():
             if not results or not json.loads(results):
                 print("No results found.")
                 continue
-            u_send_message_a(query + "\n find the best answer among these results:\n" + results, messages, model, url)
+            u_send_message_a(query + "\n find the best answer among these results:\n" + results, messages, model, url, persona_name)
             continue
 
-        u_send_message_a(user_input, messages, model, url)
+        u_send_message_a(user_input, messages, model, url, persona_name)
 
 
 if __name__ == "__main__":
