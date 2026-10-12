@@ -29,3 +29,9 @@ def embed_chunks(chunks):
         done = min(start + BATCH_SIZE, len(chunks))
         print(f"{done}/{len(chunks)} chunks embedded")
     return True
+
+def similarity(vector_a, vector_b):
+    total = 0
+    for i in range(len(vector_a)):
+        total += vector_a[i] * vector_b[i]
+    return total

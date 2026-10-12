@@ -9,7 +9,8 @@ from core.persona import load_persona, build_system_prompt
 from rag.ingest import ingest
 from tools.internet_search import internet_search
 from rag.embed import embed_chunks
-from rag.store import save_index, load_index
+from rag.store import save_index
+from rag.retrieve import retrieve
 
 
 def u_send_message_a(content, messages, model, url):
@@ -127,14 +128,21 @@ def main():
             if not embed_chunks(chunks):
                 continue
             save_index(chunks)
-            print(f"chunks indexed: {len(chunks)}")
             continue
         if user_input.startswith("/rag"):
-            chunks = load_index()
-            if chunks is None:
-                print("No index found, run /index first")
+            question = user_input[len("/rag"):].strip()
+            if not question:
+                print("Usage: /rag <question>")
                 continue
-            print(f"chunks loaded : {len(chunks)}")
+            results = retrieve(question, model, url)
+            if results is None:
+                continue
+            if not results:
+                print("Nothing relevant found in the documents")
+                continue
+            for chunk in results:
+                print(f"--- {chunk['source']} line {chunk['line']} (score {chunk['score']:.3f})")
+                print(chunk["text"])
             continue
 
         u_send_message_a(user_input, messages, model, url)
