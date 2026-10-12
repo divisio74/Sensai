@@ -1,8 +1,7 @@
 import argparse
 import json
 import requests
-# TODO avant push : décommenter (désactivé en local, python-dotenv non installé)
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 
 from core.llm import chat
 from core.boucle import code_cycle
@@ -65,9 +64,10 @@ def check_ollama(model, url):
         return None
     return True
 
+load_dotenv()
 
 def main():
-    # load_dotenv()  # TODO avant push : décommenter
+    load_dotenv()
     args = parse_args()
     model = args.model
     url = args.url
