@@ -1,11 +1,12 @@
 import argparse
 import json
 import requests
-from dotenv import load_dotenv
+# TODO avant push : décommenter (désactivé en local, python-dotenv non installé)
+# from dotenv import load_dotenv
 
 from core.llm import chat
 from core.boucle import code_cycle
-from core.persona import load_persona, build_system_prompt, get_persona_name
+from core.persona import load_persona, build_system_prompt, get_persona_name, load_user_profile
 from tools.internet_search import internet_search
 
 
@@ -66,7 +67,7 @@ def check_ollama(model, url):
 
 
 def main():
-    load_dotenv()
+    # load_dotenv()  # TODO avant push : décommenter
     args = parse_args()
     model = args.model
     url = args.url
@@ -76,7 +77,8 @@ def main():
     persona_id = "sensia"
     persona_name = get_persona_name(persona_id)
     persona_text = load_persona(persona_id)
-    system_message = build_system_prompt(persona_text)
+    user_profile = load_user_profile()
+    system_message = build_system_prompt(persona_text, user_profile)
     messages = [system_message]
 
     while True:
