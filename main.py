@@ -10,7 +10,7 @@ from rag.ingest import ingest
 from tools.internet_search import internet_search
 from rag.embed import embed_chunks
 from rag.store import save_index
-from rag.retrieve import retrieve
+from rag.retrieve import retrieve, build_prompt
 
 
 def u_send_message_a(content, messages, model, url):
@@ -140,9 +140,10 @@ def main():
             if not results:
                 print("Nothing relevant found in the documents")
                 continue
+            prompt = build_prompt(question, results)
+            u_send_message_a(prompt, messages, model, url)
             for chunk in results:
-                print(f"--- {chunk['source']} line {chunk['line']} (score {chunk['score']:.3f})")
-                print(chunk["text"])
+                print(f"Sources: {chunk['source']} - line {chunk['line']} - score {chunk['score']:.2f}")
             continue
 
         u_send_message_a(user_input, messages, model, url)
