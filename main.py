@@ -9,8 +9,12 @@ from core.persona import load_persona, build_system_prompt
 from tools.internet_search import internet_search
 
 
+MAX_SEARCH_ROUNDS = 3
+
+
 def u_send_message_a(content, messages, model, url):
     messages.append({"role": "user", "content": content})
+    search_rounds = 0
     while True:
         print("Sensia: ", end="", flush=True)
         reply = chat(messages, model, url)
@@ -25,6 +29,10 @@ def u_send_message_a(content, messages, model, url):
                 clean_reply = clean_reply[4:].strip()
             parsed = json.loads(clean_reply)
             if isinstance(parsed, list) and parsed and all(isinstance(x, str) for x in parsed):
+                search_rounds += 1
+                if search_rounds > MAX_SEARCH_ROUNDS:
+                    print("\n[Too many searches, stopping]")
+                    break
                 results_text = ""
                 for query in parsed:
                     print(f"\n[Internet search: {query}]")
@@ -109,8 +117,13 @@ def main():
             if not query.strip():
                 print("Usage: /internet_search <query>")
                 continue
-            results = internet_search(query)
-            if not results or not json.loads(results):
+            try:
+                results = internet_search(query)
+                found = json.loads(results) if results else None
+            except Exception as e:
+                print(f"Search failed: {e}")
+                continue
+            if not found:
                 print("No results found.")
                 continue
             u_send_message_a(query + "\n find the best answer among these results:\n" + results, messages, model, url)
