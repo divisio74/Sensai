@@ -19,3 +19,11 @@ tools/
 memory/
 
 ```
+
+![alt text](image.png)
+
+![alt text](image-1.png)
+
+![alt text](image-2.png)
+
+note : les history sont local -> defondable en disant que c'tes pour augmenter la spécialisation de prediction de temps du harness aux taches redondantes d'un user spécifique localement -> ca ne sert a rien de push l'history dcp

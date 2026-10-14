@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 from core.llm import chat
 from core.boucle import code_cycle
-from core.persona import load_persona, build_system_prompt
+from core.persona import PERSONAS_DIR, load_persona, build_system_prompt
 from rag.ingest import ingest
 from tools.internet_search import internet_search
 from rag.embed import embed_chunks
@@ -15,11 +15,76 @@ from timepred.runner import run as run_timed
 
 
 MAX_SEARCH_ROUNDS = 3
+MAX_FAST_RUNS = 1
 
 
-def u_send_message_a(content, messages, model, url):
+def parse_json_reply(reply):
+    clean_reply = reply.strip("` \n")
+    if clean_reply.startswith("json"):
+        clean_reply = clean_reply[4:].strip()
+    try:
+        return json.loads(clean_reply)
+    except ValueError:
+        return None
+
+
+def fast_request(parsed):
+    if not isinstance(parsed, dict) or parsed.get("tool") != "fast":
+        return None
+    task = parsed.get("task")
+    try:
+        seconds = float(parsed.get("seconds"))
+    except (TypeError, ValueError):
+        return None
+    if not isinstance(task, str) or not task.strip() or seconds <= 0:
+        return None
+    return task.strip(), seconds
+
+
+def run_fast(task, budget, model, url, persona):
+    try:
+        return run_timed(task, model, url, budget, allow_direct=persona != "dev")
+    except (requests.exceptions.RequestException, ValueError, KeyError) as e:
+        print(f"Timed run failed: {e}")
+    except KeyboardInterrupt:
+        print("\n[fast mode interrupted]")
+    return None
+
+
+def fast_note(summary, persona):
+    note = (f"[fast mode] This task actually took {summary['elapsed']:.0f} seconds "
+            f"(the user's time budget was {summary['budget']:.0f}s, "
+            f"the prediction was {summary['predicted']:.0f}s)")
+    if summary["removed"]:
+        note += f", dropped steps: {', '.join(summary['removed'])}"
+    if summary["code_verified"] is True:
+        note += ". Its code was actually run in a sandbox and worked"
+    elif summary["code_verified"] is False:
+        note += ". Its code could NOT be verified: at least one code step failed"
+    elif persona == "dev":
+        note += ". No code was executed during this task: nothing was verified"
+    return f"{note}\n\n{summary['result']}"
+
+
+def run_requested_fast(task, seconds, model, url, persona):
+    print(f"\n[Sensia wants to run: /fast {seconds:.0f} {task}]")
+    try:
+        answer = input("Run it? [y/N] ").strip().lower()
+    except (EOFError, KeyboardInterrupt):
+        answer = ""
+    if answer != "y":
+        return "The user declined the fast run. Do not request it again unless asked."
+    summary = run_fast(task, seconds, model, url, persona)
+    if summary is None:
+        return "The fast run failed or was interrupted."
+    if summary["status"] == "cancelled":
+        return "The fast run was cancelled: the time budget is too small for this task."
+    return f"Result of the fast run:\n{fast_note(summary, persona)}\nNow answer the user."
+
+
+def u_send_message_a(content, messages, model, url, persona):
     messages.append({"role": "user", "content": content})
-    search_rounds = 0
+    search_rounds, fast_runs = 0, 0
     while True:
         print("Sensia: ", end="", flush=True)
         reply = chat(messages, model, url)
@@ -27,12 +92,20 @@ def u_send_message_a(content, messages, model, url):
             messages.pop()
             return
         messages.append({"role": "assistant", "content": reply})
+        parsed = parse_json_reply(reply)
+
+        request = fast_request(parsed)
+        if request:
+            fast_runs += 1
+            if fast_runs > MAX_FAST_RUNS:
+                print("\n[Only one fast run per message, stopping]")
+                break
+            task, seconds = request
+            result = run_requested_fast(task, seconds, model, url, persona)
+            messages.append({"role": "user", "content": result})
+            continue
 
         try:
-            clean_reply = reply.strip("` \n")
-            if clean_reply.startswith("json"):
-                clean_reply = clean_reply[4:].strip()
-            parsed = json.loads(clean_reply)
             if isinstance(parsed, list) and parsed and all(isinstance(x, str) for x in parsed):
                 search_rounds += 1
                 if search_rounds > MAX_SEARCH_ROUNDS:
@@ -57,6 +130,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Sensia: Local assistant")
     parser.add_argument("--model", default="qwen2.5:3b", help="...")
     parser.add_argument("--url", default="http://localhost:11434/api/chat", help="...")
+    parser.add_argument("--persona", default="sensia", help="persona file in persona/personas/")
     return parser.parse_args()
 
 
@@ -83,10 +157,16 @@ def main():
     args = parse_args()
     model = args.model
     url = args.url
+    persona = args.persona
 
+    try:
+        persona_text = load_persona(persona)
+    except FileNotFoundError:
+        available = ", ".join(sorted(path.stem for path in PERSONAS_DIR.glob("*.md")))
+        print(f"Unknown persona '{persona}'. Available: {available}")
+        return
     if not check_ollama(model, url):
         return
-    persona_text = load_persona("sensia")
     system_message = build_system_prompt(persona_text)
     messages = [system_message]
 
@@ -111,11 +191,11 @@ def main():
             cc_output = code_cycle(task, model, url)
             if cc_output["status"] == "success":
                 content = "Here is the code you need :" + cc_output["code"] + "and the result of his execution :" + cc_output["stdout"]
-                u_send_message_a(content, messages, model, url)
+                u_send_message_a(content, messages, model, url, persona)
                 continue
             else:
                 content = "Unfortunetely its impossible to do this actually ask me to remake my goals !"
-                u_send_message_a(content, messages, model, url)
+                u_send_message_a(content, messages, model, url, persona)
                 continue
         if user_input.startswith("/fast"):
             parts = user_input.split(maxsplit=2)
@@ -127,20 +207,11 @@ def main():
                 print("Usage: /fast <seconds> <task>")
                 continue
             task = parts[2]
-            try:
-                summary = run_timed(task, model, url, budget)
-            except (requests.exceptions.RequestException, ValueError, KeyError) as e:
-                print(f"Timed run failed: {e}")
+            summary = run_fast(task, budget, model, url, persona)
+            if summary is None or summary["status"] == "cancelled":
                 continue
-            if summary["status"] == "cancelled":
-                continue
-            note = (f"[fast mode] This task actually took {summary['elapsed']:.0f} seconds "
-                    f"(the user's time budget was {summary['budget']:.0f}s, "
-                    f"the prediction was {summary['predicted']:.0f}s)")
-            if summary["removed"]:
-                note += f", dropped steps: {', '.join(summary['removed'])}"
             messages.append({"role": "user", "content": task})
-            messages.append({"role": "assistant", "content": f"{note}\n\n{summary['result']}"})
+            messages.append({"role": "assistant", "content": fast_note(summary, persona)})
             continue
         if user_input.startswith("/internet_search "):
             query = user_input[len("/internet_search "):]
@@ -156,13 +227,13 @@ def main():
             if not found:
                 print("No results found.")
                 continue
-            u_send_message_a(query + "\n find the best answer among these results:\n" + results, messages, model, url)
+            u_send_message_a(query + "\n find the best answer among these results:\n" + results, messages, model, url, persona)
             continue
 
         if user_input == "/index":
             chunks = ingest()
             if not chunks:
-                print("No documents found in knowledge/")
+                print("No documents found in knowledge/documents/")
                 continue
             if not embed_chunks(chunks):
                 continue
@@ -180,12 +251,12 @@ def main():
                 print("Nothing relevant found in the documents")
                 continue
             prompt = build_prompt(question, results)
-            u_send_message_a(prompt, messages, model, url)
+            u_send_message_a(prompt, messages, model, url, persona)
             for chunk in results:
                 print(f"Sources: {chunk['source']} - line {chunk['line']} - score {chunk['score']:.2f}")
             continue
 
-        u_send_message_a(user_input, messages, model, url)
+        u_send_message_a(user_input, messages, model, url, persona)
 
 
 if __name__ == "__main__":
