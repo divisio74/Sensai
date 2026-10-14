@@ -3,4 +3,5 @@ __pycache__/
 *.pyc
 .venv/
 /data
-
+/knowledge/index/
+/knowledge/history/
