@@ -11,6 +11,7 @@ from tools.internet_search import internet_search
 from rag.embed import embed_chunks
 from rag.store import save_index
 from rag.retrieve import retrieve, build_prompt
+from timepred.runner import run as run_timed
 
 
 MAX_SEARCH_ROUNDS = 3
@@ -116,6 +117,31 @@ def main():
                 content = "Unfortunetely its impossible to do this actually ask me to remake my goals !"
                 u_send_message_a(content, messages, model, url)
                 continue
+        if user_input.startswith("/fast"):
+            parts = user_input.split(maxsplit=2)
+            try:
+                budget = float(parts[1])
+            except (IndexError, ValueError):
+                budget = 0
+            if len(parts) < 3 or budget <= 0:
+                print("Usage: /fast <seconds> <task>")
+                continue
+            task = parts[2]
+            try:
+                summary = run_timed(task, model, url, budget)
+            except (requests.exceptions.RequestException, ValueError, KeyError) as e:
+                print(f"Timed run failed: {e}")
+                continue
+            if summary["status"] == "cancelled":
+                continue
+            note = (f"[fast mode] This task actually took {summary['elapsed']:.0f} seconds "
+                    f"(the user's time budget was {summary['budget']:.0f}s, "
+                    f"the prediction was {summary['predicted']:.0f}s)")
+            if summary["removed"]:
+                note += f", dropped steps: {', '.join(summary['removed'])}"
+            messages.append({"role": "user", "content": task})
+            messages.append({"role": "assistant", "content": f"{note}\n\n{summary['result']}"})
+            continue
         if user_input.startswith("/internet_search "):
             query = user_input[len("/internet_search "):]
             if not query.strip():
