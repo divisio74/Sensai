@@ -23,6 +23,10 @@ def load_user_profile():
         return ""
     return USER_FILE.read_text(encoding="utf-8")
 
+def remember(fact):
+    with open(USER_FILE, "a", encoding="utf-8") as f:
+        f.write(f"- {fact.strip()}\n")
+
 def build_system_prompt(persona_text, user_profile=""):
     content = persona_text
     if user_profile:

@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 from core.llm import chat
 from core.boucle import code_cycle
-from core.persona import load_persona, build_system_prompt, get_persona_name, load_user_profile
+from core.persona import load_persona, build_system_prompt, get_persona_name, load_user_profile, remember
 from tools.internet_search import internet_search
 
 
@@ -64,7 +64,6 @@ def check_ollama(model, url):
         return None
     return True
 
-load_dotenv()
 
 def main():
     load_dotenv()
@@ -108,6 +107,15 @@ def main():
                 content = "Unfortunetely its impossible to do this actually ask me to remake my goals !"
                 u_send_message_a(content, messages, model, url, persona_name)
                 continue
+        if user_input.startswith("/remember "):
+            fact = user_input[len("/remember "):]
+            if not fact.strip():
+                print("Usage: /remember <fact>")
+                continue
+            remember(fact)
+            messages[0] = build_system_prompt(load_persona(persona_id), load_user_profile())
+            print("Fact remembered.")
+            continue
         if user_input.startswith("/internet_search "):
             query = user_input[len("/internet_search "):]
             if not query.strip():
