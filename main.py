@@ -11,30 +11,11 @@ from tools.internet_search import internet_search
 from rag.embed import embed_chunks
 from rag.store import save_index
 from rag.retrieve import retrieve, build_prompt
+from core.commands import handle_command
 
 
 MAX_SEARCH_ROUNDS = 3
 
-def print_help():
-    print("Commands:")
-    print("  /help                     show this list")
-    print("  /clear                    start a new conversation")
-    print("  /code <task>              write, run and fix Python code")
-    print("  /internet_search <query>  search the web")
-    print("  /index                    index the documents in knowledge/")
-    print("  /rag <question>           answer from the documents")
-    print("  quit                      exit Sensia")
-
-def handle_command(user_input, messages):
-    command = user_input.strip()
-    if command == "/help":
-        print_help()
-        return True
-    if command == "/clear":
-        del messages[1:]
-        print("Conversation cleared.")
-        return True
-    return False
 
 def u_send_message_a(content, messages, model, url):
     messages.append({"role": "user", "content": content})
@@ -122,7 +103,7 @@ def main():
         if user_input == "quit":
             break
 
-        if handle_command(user_input, messages):
+        if handle_command(user_input, messages, model, url):
             continue
 
         if user_input.startswith("/code "):
