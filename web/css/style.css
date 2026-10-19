@@ -1,0 +1,74 @@
+:root {
+    --dark: #050505;
+    --mint: #f7faf7;
+}
+
+body {
+    background: var(--mint);
+    color: var(--dark);
+    font-family: sans-serif;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#logo {
+    position: fixed;
+    top: 16px;
+    left: 20px;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 30px;
+    font-weight: bold;
+}
+
+#greeting {
+    text-align: center;
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: normal;
+}
+
+#form {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 16px;
+    box-sizing: border-box;
+    display: flex;
+    gap: 8px;
+}
+
+#input {
+    flex: 1;
+    padding: 14px;
+    border: 2px solid var(--dark);
+    border-radius: 12px;
+    background: var(--mint);
+    color: var(--dark);
+}
+
+#send {
+    width: 42px;
+    border: none;
+    border-radius: 12px;
+    background: var(--dark);
+    color: var(--mint);
+    font-size: 30px;
+    cursor: pointer;
+}
+
+body.empty {
+    justify-content: center;
+}
+
+body.empty #chat {
+    display: none;
+}
+
+body:not(.empty) #greeting {
+    display: none;
+}
+
+body:not(.empty) #chat {
+    padding-top: 60px;
+}
