@@ -12,6 +12,8 @@ from rag.embed import embed_chunks
 from rag.store import save_index
 from rag.retrieve import retrieve, build_prompt
 from timepred.runner import run as run_timed
+from core.commands import handle_command
+
 
 
 MAX_SEARCH_ROUNDS = 3
@@ -182,6 +184,9 @@ def main():
 
         if user_input == "quit":
             break
+
+        if handle_command(user_input, messages, model, url):
+            continue
 
         if user_input.startswith("/code "):
             task = user_input[len("/code "):]
