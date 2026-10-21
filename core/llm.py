@@ -22,11 +22,11 @@ def chat(messages, model, url):
             morceau = chunk["message"]["content"]
             print(morceau, end="", flush=True)
             full_reply += morceau
+    except requests.exceptions.Timeout:
+            print("\nOllama stopped responding (timeout)")
+            return None
     except (requests.exceptions.ChunkedEncodingError, requests.exceptions.ConnectionError):
         print("\nConnection lost with Ollama")
-        return None
-    except requests.exceptions.Timeout:
-        print("\nOllama stopped responding (timeout)")
         return None
     except requests.exceptions.RequestException as e:
         print(f"\nInvalid request: {e}")

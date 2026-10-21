@@ -14,8 +14,8 @@ At startup, Sensia checks that the Ollama server responds and that the model exi
 
 - `quit`: exits Sensia.
 - `/code <task>`: Sensia writes Python code for the task, runs it in the sandbox and fixes it if there is an error.
-- `/index`: reads the documents in the `knowledge/` folder and builds the search index.
-- `/rag <question>`: Sensia answers using the documents in the `knowledge/` folder.
+- `/index`: reads the documents in the `knowledge/documents/` folder and builds the search index.
+- `/rag <question>`: Sensia answers using the documents in the `knowledge/documents/` folder.
 
 ## The sandbox
 
@@ -26,7 +26,7 @@ If the model proposes the same code twice, the loop detects it and asks the mode
 
 ## The RAG
 
-Documents must be placed in the `knowledge/` folder.
+Documents must be placed in the `knowledge/documents/` folder.
 Only `.md`, `.txt` and `.py` files are read.
 Documents are split into chunks of 500 characters, with an overlap of 100 characters.
 The embedding model is `nomic-embed-text`. It weighs 274 MB.
