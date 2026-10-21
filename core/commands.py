@@ -1,6 +1,6 @@
 from core.llm import chat
 
-KNOWN_COMMANDS = ["/help", "/clear", "/undo", "/retry", "/code", "/internet_search", "/index", "/rag"]
+KNOWN_COMMANDS = ["/help", "/clear", "/undo", "/retry", "/code", "/internet_search", "/index", "/rag", "/fast"]
 
 def print_help():
     print("Commands:")

@@ -20,7 +20,7 @@ def chunk_text(text, source):
     return chunks
 
 def ingest():
-    folder="knowledge"
+    folder="knowledge/documents"
     chunks = []
 
     for root, _, files in os.walk(folder):

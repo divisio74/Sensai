@@ -1,10 +1,10 @@
 import json
 import os
 
-INDEX_PATH = "data/index.json"
+INDEX_PATH = "knowledge/index/index.json"
 
 def save_index(chunks):
-    os.makedirs("data", exist_ok=True)
+    os.makedirs(os.path.dirname(INDEX_PATH), exist_ok=True)
     with open(INDEX_PATH, "w", encoding="utf-8") as f:
         json.dump(chunks, f)
 
