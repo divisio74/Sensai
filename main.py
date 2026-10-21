@@ -65,6 +65,9 @@ def fast_note(summary, persona):
         note += ". Its code could NOT be verified: at least one code step failed"
     elif persona == "dev":
         note += ". No code was executed during this task: nothing was verified"
+    if summary["status"] == "stopped":
+        note += (". The user stopped the task before the end because the budget would be "
+                 "exceeded: the result below is INCOMPLETE")
     return f"{note}\n\n{summary['result']}"
 
 

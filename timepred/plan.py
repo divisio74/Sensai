@@ -1,78 +1,107 @@
 import json
+import re
+
+import requests
 
 from timepred.llm import ask_ollama
 
-STEP_TYPES = {
-    "research": "find information that is not in the task",
-    "analyse": "understand the request, compare options or decide",
-    "write": "produce new content (an email, a document, a function...)",
-    "transform": "rework existing content (summarize, translate, refactor, format...)",
-    "check": "verify, test or review a result",
-    "explain": "explain something to the user",
-}
 CODE_TYPE = "code"
 DIRECT_TYPE = "direct"
-PRUNABLE_TYPES = {"analyse", "research", "check"}
+DELIVERABLE_TYPES = {"text": "write", "code": CODE_TYPE, "explanation": "explain"}
+PRODUCTION_TYPES = {"write", CODE_TYPE, "explain", DIRECT_TYPE}
+PRUNABLE_TYPES = {"research"}
 SHORT_TASK_WORDS = 12
 
-PLAN_SCHEMA = {
+CLASSIFY_SCHEMA = {
     "type": "object",
     "properties": {
-        "steps": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "name": {"type": "string"},
-                    "type": {"type": "string", "enum": list(STEP_TYPES)},
-                    "outputs_code": {"type": "boolean"},
-                    "weight": {"type": "integer"},
-                    "priority": {"type": "integer"},
-                    "essential": {"type": "boolean"},
-                },
-                "required": ["name", "type", "outputs_code", "weight", "priority", "essential"],
-            },
-        }
+        "deliverable": {"type": "string", "enum": list(DELIVERABLE_TYPES)},
     },
-    "required": ["steps"],
+    "required": ["deliverable"],
+}
+CODE_WORDS = re.compile(r"\b(function|fonction|script|programme python|python program|"
+                        r"classe python|python class)\b", re.IGNORECASE)
+RESEARCH_WORDS = re.compile(r"\b(research|look up|search|recherche|cherche|renseigne)",
+                            re.IGNORECASE)
+EXPLAIN_WORDS = re.compile(r"\b(explain|explique|expliquer|explication|describe|décris|"
+                           r"how it works|comment (ça|il|elle) (marche|fonctionne))", re.IGNORECASE)
+
+CLASSIFY_PROMPT = (
+    "You classify a task for a local assistant that can only write text and write and run "
+    "Python code.\n"
+    "- deliverable: \"code\" if the task asks to write a program, a function or a script, "
+    "even when it also asks to research, test or explain; otherwise \"explanation\" if it "
+    "asks to explain or compare a topic; otherwise \"text\" (an email, a letter, a post, "
+    "a report, a summary...)."
+)
+
+STEP_NAMES = {
+    "research": "Gather the facts the task needs",
+    "write": "Write the complete requested text, ready to use",
+    CODE_TYPE: "Write and run the requested code",
+    "explain": "Explain the topic clearly and completely",
 }
 
-PLAN_PROMPT = (
-    "You are a planner. Split the user's task into 1 to 5 sequential steps. "
-    "Use a single step when the task is simple.\n"
-    "Step types:\n"
-    + "".join(f"- {name}: {meaning}\n" for name, meaning in STEP_TYPES.items())
-    + "For each step give: name, type, outputs_code (true if the result of this step "
-    "is source code), weight (1-5, relative effort), priority (1 = most important), "
-    "essential (true if the final result is wrong or missing without this step).\n"
-    "Any step that produces an element explicitly requested in the task MUST be essential."
+REESTIMATE_SCHEMA = {
+    "type": "object",
+    "properties": {"weights": {"type": "array", "items": {"type": "integer"}}},
+    "required": ["weights"],
+}
+
+REESTIMATE_PROMPT = (
+    "You re-estimate a plan while it is running. You get the task, the steps already done, "
+    "the last result and the remaining steps. Now that you know more, give the relative "
+    "effort (1-5) of EVERY step of the plan, done and remaining, in the same order: "
+    "exactly one weight per step."
 )
+
+
+def step(step_type, weight, priority, essential, name=None):
+    return {"name": name or STEP_NAMES[step_type], "type": step_type, "weight": weight,
+            "priority": priority, "essential": essential}
+
+
+def classify_task(task, model, url):
+    try:
+        raw = ask_ollama(model, [
+            {"role": "system", "content": CLASSIFY_PROMPT},
+            {"role": "user", "content": task},
+        ], url=url, schema=CLASSIFY_SCHEMA)
+        deliverable = json.loads(raw)["deliverable"]
+    except (ValueError, KeyError):
+        return "text"
+    return deliverable if deliverable in DELIVERABLE_TYPES else "text"
 
 
 def make_plan(task, model, url, allow_direct=True):
     if allow_direct and len(task.split()) <= SHORT_TASK_WORDS:
-        return [{"name": task, "type": DIRECT_TYPE, "weight": 1, "priority": 1, "essential": True}]
-    raw = ask_ollama(model, [
-        {"role": "system", "content": PLAN_PROMPT},
-        {"role": "user", "content": task},
-    ], url=url, schema=PLAN_SCHEMA)
-    steps = json.loads(raw)["steps"]
-    for step in steps:
-        step["weight"] = min(max(step["weight"], 1), 5)
-        if step.pop("outputs_code"):
-            step["type"] = CODE_TYPE
-    return merge_code_steps(steps)
+        return [step(DIRECT_TYPE, 1, 1, True, name=task)]
+    deliverable = classify_task(task, model, url)
+    if deliverable == "text" and CODE_WORDS.search(task):
+        deliverable = "code"
+    main = DELIVERABLE_TYPES[deliverable]
+    steps = [step("research", 1, 2, False)] if RESEARCH_WORDS.search(task) else []
+    steps.append(step(main, 3, 1, True))
+    if main == CODE_TYPE and EXPLAIN_WORDS.search(task):
+        steps.append(step("explain", 1, 2, True, name="Explain the code written above"))
+    return steps
 
 
-def merge_code_steps(steps):
-    merged = []
-    for step in steps:
-        previous = merged[-1] if merged else None
-        if previous and previous["type"] == CODE_TYPE and step["type"] == CODE_TYPE:
-            previous["name"] += "; " + step["name"]
-            previous["weight"] += step["weight"]
-            previous["priority"] = min(previous["priority"], step["priority"])
-            previous["essential"] = previous["essential"] or step["essential"]
-        else:
-            merged.append(step)
-    return merged
+def reestimate_weights(task, steps, done_count, last_result, model, url):
+    listing = (f"Task: {task}\n"
+               f"Last result (truncated): {last_result[-500:]}\n"
+               "Plan:\n"
+               + "".join(f"{i}. [{'done' if i <= done_count else 'remaining'}] "
+                         f"{step['name']} ({step['type']})\n"
+                         for i, step in enumerate(steps, 1)))
+    try:
+        raw = ask_ollama(model, [
+            {"role": "system", "content": REESTIMATE_PROMPT},
+            {"role": "user", "content": listing},
+        ], url=url, schema=REESTIMATE_SCHEMA)
+        weights = json.loads(raw)["weights"]
+    except (requests.exceptions.RequestException, ValueError, KeyError):
+        return None
+    if len(weights) != len(steps) or not all(isinstance(w, int) for w in weights):
+        return None
+    return [min(max(w, 1), 5) for w in weights]

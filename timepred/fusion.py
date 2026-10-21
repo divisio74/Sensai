@@ -2,12 +2,15 @@ import math
 
 C_PROG = 3.0
 P_MIN_PROG = 0.6
+P_ONLY_PROG = 0.8
 
 
 def progression_prior(elapsed, p):
     t_prog = elapsed / p
     if p < P_MIN_PROG:
         return t_prog, math.inf
+    if p >= P_ONLY_PROG:
+        return t_prog, 0.0
     sigma = C_PROG * t_prog * (1 - p) / p
     return t_prog, sigma
 

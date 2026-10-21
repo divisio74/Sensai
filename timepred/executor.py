@@ -16,10 +16,10 @@ def run_code_step(step, task, previous, model, url):
     output = f"```python\n{result['code'] or ''}\n```"
     if ok:
         output += f"\nOutput:\n{result['stdout']}"
-    return duration, ok, output
+    return duration, ok, output, None
 
 
-def run_step(step, task, previous, model, url):
+def run_step(step, task, previous, model, url, on_progress=None, max_words=None):
     if step["type"] == CODE_TYPE:
         return run_code_step(step, task, previous, model, url)
-    return run_step_as_subprocess(step, task, previous, model, url)
+    return run_step_as_subprocess(step, task, previous, model, url, on_progress, max_words)
