@@ -188,7 +188,10 @@ def main():
         if user_input == "quit":
             break
 
-        if handle_command(user_input, messages, model, url):
+        output = handle_command(user_input, messages, model, url)
+        if output is not None:
+            if output:
+                print(output)
             continue
 
         if user_input.startswith("/code "):

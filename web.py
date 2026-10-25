@@ -4,18 +4,19 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from core.llm import chat
 from core.persona import load_persona, build_system_prompt
+from core.commands import handle_command
 
 HOST = "127.0.0.1"
 PORT = 4040
 MODEL = "qwen2.5:3b"
 OLLAMA_URL = "http://localhost:11434/api/chat"
 
-system_message = build_system_prompt(load_persona("sensia"))
+messages = [build_system_prompt(load_persona("sensia"))]
 
 app = FastAPI()
 
 class ChatRequest(BaseModel):
-    messages: list
+    text: str
 
 @app.get("/")
 def home():
@@ -29,12 +30,22 @@ def style():
 def script():
     return FileResponse("web/js/app.js")
 
+@app.get("/api/history")
+def api_history():
+    return {"messages": messages[1:]}
+
 @app.post("/api/chat")
 def api_chat(request: ChatRequest):
-    reply = chat([system_message] + request.messages, MODEL, OLLAMA_URL)
-    if reply is None:
-        return {"error": "Sensai could not answer (is Ollama running?)"}
-    return {"reply": reply}
+    output = handle_command(request.text, messages, MODEL, OLLAMA_URL)
+    if output is None:
+        messages.append({"role": "user", "content": request.text})
+        reply = chat(messages, MODEL, OLLAMA_URL)
+        if reply is None:
+            messages.pop()
+            output = "Sensai could not answer (is Ollama running?)"
+        else:
+            messages.append({"role": "assistant", "content": reply})
+    return {"output": output, "messages": messages[1:]}
 
 def run():
     uvicorn.run(app, host=HOST, port=PORT)

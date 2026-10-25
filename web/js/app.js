@@ -3,7 +3,6 @@ const form = document.getElementById("form");
 const input = document.getElementById("input");
 const send = document.getElementById("send");
 const newChat = document.getElementById("new-chat");
-const messages = [];
 
 function scrollDown()
 {
@@ -53,11 +52,64 @@ function showTyping(content)
     content.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
 }
 
-function showAnswer(content, answer)
+function showAssistant(text)
 {
-    content.innerHTML = "";
-    renderText(content, answer.text);
+    const content = createAssistant();
+
+    renderText(content, text);
     scrollDown();
+}
+
+function showCommandOutput(text)
+{
+    const content = createAssistant();
+
+    content.classList.add("command");
+    renderText(content, text);
+    scrollDown();
+}
+
+let notes = [];
+
+function showNotes(position)
+{
+    notes.forEach((note) => {
+        if (note.position === position) {
+            showUser(note.text);
+            showCommandOutput(note.output);
+        }
+    });
+}
+
+function showConversation(messages)
+{
+    chat.innerHTML = "";
+    notes.forEach((note) => {
+        note.position = Math.min(note.position, messages.length);
+    });
+    showNotes(0);
+    messages.forEach((message, index) => {
+        if (message.role === "user")
+            showUser(message.content);
+        else if (message.role === "assistant")
+            showAssistant(message.content);
+        showNotes(index + 1);
+    });
+    document.body.classList.toggle("empty", messages.length === 0 && notes.length === 0);
+}
+
+async function sendText(text)
+{
+    try {
+        const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: text }),
+        });
+        return await response.json();
+    } catch (error) {
+        return { output: "The server is not reachable.", messages: null };
+    }
 }
 
 form.addEventListener("submit", async (event) => {
@@ -69,45 +121,33 @@ form.addEventListener("submit", async (event) => {
     input.value = "";
     document.body.classList.remove("empty");
     showUser(text);
-    messages.push({ role: "user", content: text });
-
-    const content = createAssistant();
-    showTyping(content);
+    showTyping(createAssistant());
     send.disabled = true;
 
-    const answer = await askSensai();
-    if (answer.error) {
-        messages.pop();
-        showAnswer(content, { text: answer.error });
+    const data = await sendText(text);
+    if (text === "/clear")
+        notes = [];
+    else if (data.output && data.messages)
+        notes.push({ position: data.messages.length, text: text, output: data.output });
+
+    if (data.messages) {
+        showConversation(data.messages);
     } else {
-        messages.push({ role: "assistant", content: answer.text });
-        showAnswer(content, answer);
+        chat.lastChild.remove();
+        showCommandOutput(data.output);
     }
     send.disabled = false;
     input.focus();
 });
 
-newChat.addEventListener("click", () => {
-    messages.length = 0;
-    chat.innerHTML = "";
-    document.body.classList.add("empty");
+newChat.addEventListener("click", async () => {
+    const data = await sendText("/clear");
+    notes = [];
+    showConversation(data.messages || []);
     input.focus();
 });
 
-async function askSensai()
-{
-    try {
-        const response = await fetch("/api/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ messages: messages }),
-        });
-        const data = await response.json();
-
-        if (data.error)
-            return { error: data.error };
-        return { text: data.reply };
-    } catch (error) {
-        return { error: "The server is not reachable." };
-    }
-}
+fetch("/api/history")
+    .then((response) => response.json())
+    .then((data) => showConversation(data.messages))
+    .catch(() => {});
