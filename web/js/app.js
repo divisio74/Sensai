@@ -69,13 +69,20 @@ function showCommandOutput(text)
     scrollDown();
 }
 
-let notes = [];
+let notes = JSON.parse(localStorage.getItem("notes") || "[]");
+let shownCount = 0;
+
+function saveNotes()
+{
+    localStorage.setItem("notes", JSON.stringify(notes));
+}
 
 function showNotes(position)
 {
     notes.forEach((note) => {
         if (note.position === position) {
-            showUser(note.text);
+            if (note.text)
+                showUser(note.text);
             showCommandOutput(note.output);
         }
     });
@@ -84,13 +91,15 @@ function showNotes(position)
 function showConversation(messages)
 {
     chat.innerHTML = "";
+    shownCount = messages.length;
+
     notes.forEach((note) => {
         note.position = Math.min(note.position, messages.length);
     });
     showNotes(0);
     messages.forEach((message, index) => {
         if (message.role === "user")
-            showUser(message.content);
+            showUser(message.display || message.content);
         else if (message.role === "assistant")
             showAssistant(message.content);
         showNotes(index + 1);
@@ -127,8 +136,11 @@ form.addEventListener("submit", async (event) => {
     const data = await sendText(text);
     if (text === "/clear")
         notes = [];
-    else if (data.output && data.messages)
-        notes.push({ position: data.messages.length, text: text, output: data.output });
+    else if (data.output && data.messages) {
+        const added = data.messages.length > shownCount;
+        notes.push({ position: data.messages.length, text: added ? null : text, output: data.output });
+    }
+    saveNotes();
 
     if (data.messages) {
         showConversation(data.messages);
@@ -143,6 +155,7 @@ form.addEventListener("submit", async (event) => {
 newChat.addEventListener("click", async () => {
     const data = await sendText("/clear");
     notes = [];
+    saveNotes();
     showConversation(data.messages || []);
     input.focus();
 });

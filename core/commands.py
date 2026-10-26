@@ -1,4 +1,12 @@
+import json
+
 from core.llm import chat
+from tools.internet_search import internet_search
+from rag.ingest import ingest
+from rag.embed import embed_chunks
+from rag.store import save_index
+from rag.retrieve import retrieve, build_prompt
+from core.boucle import code_cycle
 
 KNOWN_COMMANDS = ["/help", "/clear", "/undo", "/retry", "/code", "/internet_search", "/index", "/rag", "/fast"]
 
@@ -39,6 +47,54 @@ def retry(messages, model, url):
     messages.append({"role": "assistant", "content": reply})
     return ""
 
+def index_documents():
+    chunks = ingest()
+    if not chunks:
+        return "No documents found in knowledge/documents/"
+    if not embed_chunks(chunks):
+        return "Indexing failed (is Ollama running?)"
+    save_index(chunks)
+    return f"{len(chunks)} chunks indexed."
+
+def rag(question, messages, model, url):
+    if not question:
+        return "Usage: /rag <question>"
+    results = retrieve(question, model, url)
+    if results is None:
+        return "No index found (run /index first) or Ollama is not reachable."
+    if not results:
+        return "Nothing relevant found in the documents"
+    prompt = build_prompt(question, results)
+    messages.append({"role": "user", "content": prompt, "display": "/rag " + question})
+    print("Sensia: ", end="", flush=True)
+    reply = chat(messages, model, url)
+    if reply is None:
+        messages.pop()
+        return "Sensia could not answer (is Ollama running?)"
+    messages.append({"role": "assistant", "content": reply})
+    messages[-2]["content"] = question
+    sources = ""
+    for chunk in results:
+        sources += f"\nSources: {chunk['source']} - line {chunk['line']} - score {chunk['score']:.2f}"
+    return sources
+
+def code(task, messages, model, url):
+    if not task:
+        return "Usage: /code <task>"
+    result = code_cycle(task, model, url)
+    if result["status"] == "success":
+        content = ("Here is the code you need :" + result["code"] + "and the result of his execution :" + result["stdout"])
+    else:
+        content = "Unfortunetely its impossible to do this actually ask me to remake my goals !"
+    messages.append({"role": "user", "content": content, "display": "/code " + task})
+    print("Sensia: ", end="", flush=True)
+    reply = chat(messages, model, url)
+    if reply is None:
+        messages.pop()
+        return "Sensia could not answer (is Ollama running?)"
+    messages.append({"role": "assistant", "content": reply})
+    return ""
+
 def handle_command(user_input, messages, model, url):
     command = user_input.strip()
     if command == "/help":
@@ -49,6 +105,12 @@ def handle_command(user_input, messages, model, url):
         return undo(messages)
     if command == "/retry":
         return retry(messages, model, url)
+    if command == "/index":
+        return index_documents()
+    if command.startswith("/rag"):
+        return rag(command[len("/rag"):].strip(), messages, model, url)
+    if command.startswith("/code"):
+        return code(command[len("/code"):].strip(), messages, model, url)
     if command.startswith("/") and command.split()[0] not in KNOWN_COMMANDS:
         return "Unknown command, type /help"
     return None

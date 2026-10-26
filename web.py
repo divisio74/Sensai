@@ -8,8 +8,8 @@ from core.commands import handle_command
 
 HOST = "127.0.0.1"
 PORT = 4040
-MODEL = "qwen2.5:3b"
-OLLAMA_URL = "http://localhost:11434/api/chat"
+MODEL = None
+OLLAMA_URL = None
 
 messages = [build_system_prompt(load_persona("sensia"))]
 
@@ -47,8 +47,10 @@ def api_chat(request: ChatRequest):
             messages.append({"role": "assistant", "content": reply})
     return {"output": output, "messages": messages[1:]}
 
-def run():
-    uvicorn.run(app, host=HOST, port=PORT)
+def run(model, url, persona):
+    global MODEL, OLLAMA_URL
 
-if __name__ == "__main__":
-    run()
+    MODEL = model
+    OLLAMA_URL = url
+    messages[0] = build_system_prompt(load_persona(persona))
+    uvicorn.run(app, host=HOST, port=PORT)
