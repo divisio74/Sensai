@@ -7,7 +7,6 @@ from core.llm import chat
 from core.boucle import code_cycle
 from core.persona import PERSONAS_DIR, load_persona, build_system_prompt
 from rag.ingest import ingest
-from tools.internet_search import internet_search
 from rag.embed import embed_chunks
 from rag.store import save_index
 from rag.retrieve import retrieve, build_prompt
@@ -220,22 +219,6 @@ def main():
                 continue
             messages.append({"role": "user", "content": task})
             messages.append({"role": "assistant", "content": fast_note(summary, persona)})
-            continue
-        if user_input.startswith("/internet_search "):
-            query = user_input[len("/internet_search "):]
-            if not query.strip():
-                print("Usage: /internet_search <query>")
-                continue
-            try:
-                results = internet_search(query)
-                found = json.loads(results) if results else None
-            except Exception as e:
-                print(f"Search failed: {e}")
-                continue
-            if not found:
-                print("No results found.")
-                continue
-            u_send_message_a(query + "\n find the best answer among these results:\n" + results, messages, model, url, persona)
             continue
 
         if user_input == "/index":
