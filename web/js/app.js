@@ -107,7 +107,7 @@ function showConversation(messages)
     document.body.classList.toggle("empty", messages.length === 0 && notes.length === 0);
 }
 
-async function sendText(text)
+async function sendText(text, onPiece)
 {
     try {
         const response = await fetch("/api/chat", {
@@ -115,7 +115,26 @@ async function sendText(text)
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text: text }),
         });
-        return await response.json();
+
+        if (response.headers.get("content-type").includes("application/json"))
+            return await response.json();
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let streamed = "";
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done)
+                break;
+            const piece = decoder.decode(value, { stream: true });
+            streamed += piece;
+            onPiece(streamed);
+        }
+
+        const history = await fetch("/api/history");
+        const data = await history.json();
+        data.streamed = streamed;
+        return data;
     } catch (error) {
         return { output: "The server is not reachable.", messages: null };
     }
@@ -130,10 +149,16 @@ form.addEventListener("submit", async (event) => {
     input.value = "";
     document.body.classList.remove("empty");
     showUser(text);
-    showTyping(createAssistant());
+    const content = createAssistant();
+    showTyping(content);
     send.disabled = true;
 
-    const data = await sendText(text);
+    const data = await sendText(text, (streamed) => {
+        content.textContent = streamed;
+        scrollDown();
+    });
+    if (data.streamed !== undefined && data.messages.length === shownCount)
+        data.output = data.streamed;
     if (text === "/clear")
         notes = [];
     else if (data.output && data.messages) {

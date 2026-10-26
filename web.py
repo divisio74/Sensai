@@ -1,8 +1,9 @@
 import uvicorn
+import requests
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
-from core.llm import chat
+from core.llm import stream_chat
 from core.persona import load_persona, build_system_prompt
 from core.commands import handle_command
 
@@ -34,18 +35,25 @@ def script():
 def api_history():
     return {"messages": messages[1:]}
 
+def stream_answer(text):
+    messages.append({"role": "user", "content": text})
+    reply = ""
+    try:
+        for piece in stream_chat(messages, MODEL, OLLAMA_URL):
+            reply += piece
+            yield piece
+    except requests.exceptions.RequestException:
+        messages.pop()
+        yield "\n[Sensai could not answer (is Ollama running?)]"
+        return
+    messages.append({"role": "assistant", "content": reply})
+
 @app.post("/api/chat")
 def api_chat(request: ChatRequest):
     output = handle_command(request.text, messages, MODEL, OLLAMA_URL)
-    if output is None:
-        messages.append({"role": "user", "content": request.text})
-        reply = chat(messages, MODEL, OLLAMA_URL)
-        if reply is None:
-            messages.pop()
-            output = "Sensai could not answer (is Ollama running?)"
-        else:
-            messages.append({"role": "assistant", "content": reply})
-    return {"output": output, "messages": messages[1:]}
+    if output is not None:
+        return {"output": output, "messages": messages[1:]}
+    return StreamingResponse(stream_answer(request.text), media_type="text/plain")
 
 def run(model, url, persona):
     global MODEL, OLLAMA_URL
