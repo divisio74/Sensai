@@ -92,6 +92,8 @@ def code(task, messages, model, url):
     if reply is None:
         messages.pop()
         return "Sensia could not answer (is Ollama running?)"
+    if result["status"] == "success":
+        reply = "```python\n" + result["code"] + "\n```\nOutput:\n```\n" + result["stdout"] + "```\n" + reply
     messages.append({"role": "assistant", "content": reply})
     return ""
 

@@ -1,6 +1,7 @@
 # Sensia
 
-A local CLI AI assistant built on Ollama, with a **self-correcting code agent**.
+A local AI assistant built on Ollama, usable from the terminal or a web page, with a
+**self-correcting code agent**.
 
 Sensia is a chatbot that can also *act*: given a task, it writes Python code, runs it in a
 separate process, reads the real error output, and rewrites the code until it runs — or until
@@ -16,12 +17,14 @@ No LLM framework is used. Every call to the model is a direct HTTP request to th
 - [Ollama](https://ollama.com) running locally
 - A LangSearch API key
 - `requests` and `python-dotenv`
+- `fastapi` and `uvicorn` (only for the web interface)
 
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ollama pull qwen2.5:3b
 ollama pull nomic-embed-text
-
 ```
 
 Set `LANGSEARCH_API_KEY` in a `.env` file at the project root. The test runner loads this file
@@ -31,10 +34,12 @@ with `python-dotenv`.
 
 ```bash
 python3 main.py
-python3 main.py --model qwen2.5:7b #not the default model
+python3 main.py --model qwen2.5:7b
 python3 main.py --url http://other-host:11434/api/chat
+python3 main.py --web
 python3 main.py --help
 ```
+`--model`, `--url` and `--persona` work the same way with `--web`.
 
 ## Tests
 
@@ -46,13 +51,20 @@ python3 tests/main.py
 
 ## Usage
 
-| Input | Effect |
-|---|---|
-| any text | normal conversation, streamed token by token |
-| `/code <task>` | runs the self-correcting code agent on `<task>` |
-| `/internet_search <query>` | searches the web and feeds the results to agent |
-| `quit` | exits |
-| `Ctrl+C` / `Ctrl+D` | exits cleanly |
+| Input | Effect | Web |
+|---|---|---|
+| any text | normal conversation, streamed token by token | ✅ |
+| `/help` | lists the commands | ✅ |
+| `/clear` | starts a new conversation | ✅ (also the *New chat* button) |
+| `/undo` | removes the last question and answer | ✅ |
+| `/retry` | generates a new answer to the last question | ✅ |
+| `/index` | indexes the documents of `knowledge/documents/` | ✅ |
+| `/rag <question>` | answers from the documents and lists the sources | ✅ |
+| `/code <task>` | runs the self-correcting code agent on `<task>` (Python only) | ✅ (code and output shown) |
+| `/internet_search <query>` | searches the web and feeds the results to agent | ❌ terminal only |
+| `/fast <seconds> <task>` | runs a task within a time budget | ❌ terminal only |
+| `quit` | exits | — |
+| `Ctrl+C` / `Ctrl+D` | exits cleanly | — |
 
 ```
 You: /code sort [3,1,2] without using sorted() and print the result
@@ -70,15 +82,65 @@ assistant can talk about code it produced in a *separate* conversation.
 
 ---
 
+## Web interface
+
+`python3 main.py --web` starts a small FastAPI server and serves a chat page on
+http://127.0.0.1:4040. The page sends what the user types to the server, which answers with the
+same code as the terminal.
+
+```
+browser (web/index.html, css, js)          web.py (FastAPI)
+   POST /api/chat {text}  ───────────────►  handle_command()  ──► /help, /clear, /rag, /code...
+   ◄─────────────── {output, messages}  (JSON)
+                                             or stream_chat()  ──► Ollama
+   ◄─────────────── the answer, piece by piece  (text stream)
+   GET /api/history  ────────────────────►  the conversation (to redraw it after a reload)
+```
+
+### Technical decisions
+
+**Same backend as the terminal.** The commands live in `core/commands.py` and *return* their text
+instead of printing it. The terminal prints it, the web sends it to the page. Each command is
+written once and behaves the same in both interfaces.
+
+**The conversation is kept by the server.** Like `main.py`, `web.py` keeps one `messages` list.
+The page only displays what the server returns, so `/undo` or `/clear` need no logic in
+JavaScript, and reloading the page does not lose the conversation. Sensai is a local, single-user
+assistant, so one list is enough.
+
+**Streaming with a Python generator.** `stream_chat()` in `core/llm.py` *yields* each piece of
+the answer as Ollama produces it. The terminal prints the pieces, the web sends them through a
+FastAPI `StreamingResponse`, and the page reads them with `response.body.getReader()`. The answer
+appears word by word instead of after several seconds of waiting. Commands still answer in JSON,
+so the page knows which kind of answer it gets from the `Content-Type` header.
+
+**HTML, CSS and plain JavaScript, no build step.** The page is served as-is by FastAPI: no
+Node.js, no compilation, one command to start everything. TypeScript or React would have brought
+type checking, at the cost of a toolchain far heavier than this interface needs.
+
+### Limitations
+
+- The answers of `/rag`, `/code` and `/retry` are shown at once, not streamed.
+- Reloading the page while an answer is streaming loses that answer.
+- In the web, the normal chat does not run the automatic internet search: when the model asks
+  for a search, the request is shown as is. `/internet_search` and `/fast` only work in the
+  terminal for now.
+- All browser tabs share the same conversation, which is lost when the server restarts.
+- Command bubbles (`/help`, sources of `/rag`...) are saved by the browser, not by the server.
+
+---
+
 ## Architecture
 
 ```
 main.py                  CLI, chat history, command dispatch
 │
-├── core/llm.py          HTTP transport to Ollama, NDJSON streaming
+├── core/commands.py     commands shared by the CLI and the web (/help, /undo, /rag, /code...)
+├── core/llm.py          HTTP transport to Ollama, NDJSON streaming (stream_chat, chat)
 ├── core/boucle.py       the reflection loop  (code_cycle)
 ├── core/code_extract.py pulls Python out of the model's markdown answer
-└── tools/sandbox.py     runs code in a subprocess  (run_python)
+├── tools/sandbox.py     runs code in a subprocess  (run_python)
+└── web.py               web server (--web), uses the same commands and stream_chat()
 ```
 
 ### The reflection loop
@@ -219,9 +281,6 @@ The threat model covered here is *accidentally destructive LLM output*, not a de
 attacker. Filesystem isolation (temporary working directory), a cleaned environment and
 `resource.setrlimit` caps are the natural next step.
 
-**No timeout on the HTTP request.** If Ollama hangs mid-stream, the loop waits indefinitely. A
-`timeout=(connect, read)` on `requests.post` would bound it.
-
 **Contradictory tasks.** A task can be impossible as stated (e.g. "compute fib(42) with naive
 recursion" cannot finish within the execution budget). The model then oscillates between the
 user's constraint and the execution feedback. The stagnation message explicitly allows it to say
@@ -246,9 +305,16 @@ instruction-following and role tracking than a 7B. The model is selectable at ru
 ## Project layout
 
 ```
-main.py                  entry point, CLI, chat loop
+main.py                  entry point, CLI, chat loop (--web starts the web interface)
+web.py                   FastAPI server: /api/chat, /api/history, static files
+web/
+    index.html           chat page
+    css/style.css        design
+    js/app.js            sends the text, reads the stream, redraws the conversation
 core/
-    llm.py               chat(messages, model, url) -> str | None
+    commands.py          handle_command(text, messages, model, url) -> str | None
+    llm.py               stream_chat(messages, model, url) -> yields str
+                         chat(messages, model, url) -> str | None
     boucle.py            code_cycle(task, model, url, max_iterations=3) -> dict
     code_extract.py      extract_code(text) -> str
 tools/
