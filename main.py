@@ -4,16 +4,11 @@ import requests
 from dotenv import load_dotenv
 
 from core.llm import chat
-from core.boucle import code_cycle
 from core.persona import PERSONAS_DIR, load_persona, build_system_prompt
-from rag.ingest import ingest
 from tools.internet_search import internet_search
-from rag.embed import embed_chunks
-from rag.store import save_index
-from rag.retrieve import retrieve, build_prompt
 from timepred.runner import run as run_timed
 from core.commands import handle_command
-
+from web import run
 
 
 MAX_SEARCH_ROUNDS = 3
@@ -133,9 +128,10 @@ def u_send_message_a(content, messages, model, url, persona):
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Sensia: Local assistant")
-    parser.add_argument("--model", default="qwen2.5:3b", help="...")
-    parser.add_argument("--url", default="http://localhost:11434/api/chat", help="...")
+    parser.add_argument("--model", default="qwen2.5:3b", help="Ollama model to use (default: qwen2.5:3b)")
+    parser.add_argument("--url", default="http://localhost:11434/api/chat", help="Ollama chat API URL (default: http://localhost:11434/api/chat)")
     parser.add_argument("--persona", default="sensia", help="persona file in persona/personas/")
+    parser.add_argument("--web", action="store_true", help="start the web interface instead of the terminal")
     return parser.parse_args()
 
 
@@ -172,6 +168,9 @@ def main():
         return
     if not check_ollama(model, url):
         return
+    if args.web:
+        run(model, url, persona)
+        return
     system_message = build_system_prompt(persona_text)
     messages = [system_message]
 
@@ -188,23 +187,12 @@ def main():
         if user_input == "quit":
             break
 
-        if handle_command(user_input, messages, model, url):
+        output = handle_command(user_input, messages, model, url)
+        if output is not None:
+            if output:
+                print(output)
             continue
 
-        if user_input.startswith("/code "):
-            task = user_input[len("/code "):]
-            if not task.strip():
-                print("Usage: /code <task>")
-                continue
-            cc_output = code_cycle(task, model, url)
-            if cc_output["status"] == "success":
-                content = "Here is the code you need :" + cc_output["code"] + "and the result of his execution :" + cc_output["stdout"]
-                u_send_message_a(content, messages, model, url, persona)
-                continue
-            else:
-                content = "Unfortunetely its impossible to do this actually ask me to remake my goals !"
-                u_send_message_a(content, messages, model, url, persona)
-                continue
         if user_input.startswith("/fast"):
             parts = user_input.split(maxsplit=2)
             try:
@@ -237,33 +225,6 @@ def main():
                 continue
             u_send_message_a(query + "\n find the best answer among these results:\n" + results, messages, model, url, persona)
             continue
-
-        if user_input == "/index":
-            chunks = ingest()
-            if not chunks:
-                print("No documents found in knowledge/documents/")
-                continue
-            if not embed_chunks(chunks):
-                continue
-            save_index(chunks)
-            continue
-        if user_input.startswith("/rag"):
-            question = user_input[len("/rag"):].strip()
-            if not question:
-                print("Usage: /rag <question>")
-                continue
-            results = retrieve(question, model, url)
-            if results is None:
-                continue
-            if not results:
-                print("Nothing relevant found in the documents")
-                continue
-            prompt = build_prompt(question, results)
-            u_send_message_a(prompt, messages, model, url, persona)
-            for chunk in results:
-                print(f"Sources: {chunk['source']} - line {chunk['line']} - score {chunk['score']:.2f}")
-            continue
-
         u_send_message_a(user_input, messages, model, url, persona)
 
 
