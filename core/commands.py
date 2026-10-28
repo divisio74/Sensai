@@ -1,14 +1,13 @@
 import json
 
 from core.llm import chat
-from tools.internet_search import internet_search
 from rag.ingest import ingest
 from rag.embed import embed_chunks
 from rag.store import save_index
 from rag.retrieve import retrieve, build_prompt
 from core.boucle import code_cycle
 
-KNOWN_COMMANDS = ["/help", "/clear", "/undo", "/retry", "/code", "/internet_search", "/index", "/rag", "/fast"]
+KNOWN_COMMANDS = ["/help", "/clear", "/undo", "/retry", "/code", "/index", "/rag", "/fast"]
 
 HELP_TEXT = """Commands:
   /help                     show this list
@@ -16,7 +15,6 @@ HELP_TEXT = """Commands:
   /undo                     remove the last question and answer
   /retry                    generate a new answer to the last question
   /code <task>              write, run and fix Python code
-  /internet_search <query>  search the web
   /index                    index the documents in knowledge/
   /rag <question>           answer from the documents
   /fast <seconds> <task>    run a task within a time budget

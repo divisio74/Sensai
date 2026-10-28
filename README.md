@@ -61,7 +61,6 @@ python3 tests/main.py
 | `/index` | indexes the documents of `knowledge/documents/` | ✅ |
 | `/rag <question>` | answers from the documents and lists the sources | ✅ |
 | `/code <task>` | runs the self-correcting code agent on `<task>` (Python only) | ✅ (code and output shown) |
-| `/internet_search <query>` | searches the web and feeds the results to agent | ❌ terminal only |
 | `/fast <seconds> <task>` | runs a task within a time budget | ❌ terminal only |
 | `quit` | exits | — |
 | `Ctrl+C` / `Ctrl+D` | exits cleanly | — |
@@ -123,7 +122,7 @@ type checking, at the cost of a toolchain far heavier than this interface needs.
 - The answers of `/rag`, `/code` and `/retry` are shown at once, not streamed.
 - Reloading the page while an answer is streaming loses that answer.
 - In the web, the normal chat does not run the automatic internet search: when the model asks
-  for a search, the request is shown as is. `/internet_search` and `/fast` only work in the
+  for a search, the request is shown as is. `/fast` only works in the
   terminal for now.
 - All browser tabs share the same conversation, which is lost when the server restarts.
 - Command bubbles (`/help`, sources of `/rag`...) are saved by the browser, not by the server.
