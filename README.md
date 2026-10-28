@@ -18,6 +18,9 @@ No LLM framework is used. Every call to the model is a direct HTTP request to th
 - `requests` and `python-dotenv`
 
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
+
 pip install -r requirements.txt
 ollama pull qwen2.5:3b
 ollama pull nomic-embed-text

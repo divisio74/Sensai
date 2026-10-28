@@ -1,3 +1,4 @@
+from datetime import date
 from pathlib import Path
 
 path = Path(__file__).resolve()
@@ -10,4 +11,4 @@ def load_persona(persona_id):
     return texte
 
 def build_system_prompt(persona_text):
-    return {"role": "system", "content": persona_text}
+    return {"role": "system", "content": f"{persona_text}\n\nToday's date is {date.today().isoformat()}."}

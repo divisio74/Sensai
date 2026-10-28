@@ -1,13 +1,16 @@
 import requests
 import json
 
-def chat(messages, model, url):
+def chat_with_tools(messages, model, url, tools=None):
     payload = {
         "model": model,
         "messages": messages,
         "stream": True,
     }
+    if tools:
+        payload["tools"] = tools
     full_reply = ""
+    tool_calls = []
     try:
         response = requests.post(url, json=payload, stream=True, timeout=(5, 120))
 
@@ -19,9 +22,11 @@ def chat(messages, model, url):
             if not line:
                 continue
             chunk = json.loads(line)
-            morceau = chunk["message"]["content"]
+            message = chunk["message"]
+            morceau = message["content"]
             print(morceau, end="", flush=True)
             full_reply += morceau
+            tool_calls.extend(message.get("tool_calls") or [])
     except requests.exceptions.Timeout:
             print("\nOllama stopped responding (timeout)")
             return None
@@ -33,7 +38,12 @@ def chat(messages, model, url):
         return None
     except KeyboardInterrupt:
         print("\n[interrupted]")
-        return full_reply or None
+        return (full_reply, []) if full_reply else None
 
     print()
-    return full_reply
+    return full_reply, tool_calls
+
+
+def chat(messages, model, url):
+    result = chat_with_tools(messages, model, url)
+    return result[0] if result else None

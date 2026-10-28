@@ -3,7 +3,8 @@ import json
 import requests
 from dotenv import load_dotenv
 
-from core.llm import chat
+from core.llm import chat_with_tools
+from core.mcp_client import get_tools, call_tool
 from core.boucle import code_cycle
 from core.persona import PERSONAS_DIR, load_persona, build_system_prompt
 from rag.ingest import ingest
@@ -15,8 +16,9 @@ from core.commands import handle_command
 
 
 
-MAX_SEARCH_ROUNDS = 3
+MAX_TOOL_ROUNDS = 3
 MAX_FAST_RUNS = 1
+TOOLS = []
 
 
 def parse_json_reply(reply):
@@ -88,17 +90,20 @@ def run_requested_fast(task, seconds, model, url, persona):
 
 def u_send_message_a(content, messages, model, url, persona):
     messages.append({"role": "user", "content": content})
-    search_rounds, fast_runs = 0, 0
+    tool_rounds, fast_runs = 0, 0
     while True:
         print("Sensia: ", end="", flush=True)
-        reply = chat(messages, model, url)
-        if reply is None:
+        result = chat_with_tools(messages, model, url, TOOLS)
+        if result is None:
             messages.pop()
             return
-        messages.append({"role": "assistant", "content": reply})
-        parsed = parse_json_reply(reply)
+        reply, tool_calls = result
+        message = {"role": "assistant", "content": reply}
+        if tool_calls:
+            message["tool_calls"] = tool_calls
+        messages.append(message)
 
-        request = fast_request(parsed)
+        request = fast_request(parse_json_reply(reply))
         if request:
             fast_runs += 1
             if fast_runs > MAX_FAST_RUNS:
@@ -109,24 +114,21 @@ def u_send_message_a(content, messages, model, url, persona):
             messages.append({"role": "user", "content": result})
             continue
 
-        try:
-            if isinstance(parsed, list) and parsed and all(isinstance(x, str) for x in parsed):
-                search_rounds += 1
-                if search_rounds > MAX_SEARCH_ROUNDS:
-                    print("\n[Too many searches, stopping]")
-                    break
-                results_text = ""
-                for query in parsed:
-                    print(f"\n[Internet search: {query}]")
-                    try:
-                        res = internet_search(query)
-                        results_text += f"Results for '{query}':\n{res}\n"
-                    except Exception as e:
-                        results_text += f"Error searching '{query}': {e}\n"
-                messages.append({"role": "user", "content": f"Here are the search results:\n{results_text}\nNow answer the user."})
-                continue
-        except Exception:
-            pass
+        if tool_calls:
+            tool_rounds += 1
+            if tool_rounds > MAX_TOOL_ROUNDS:
+                print("\n[Too many tool calls, stopping]")
+                break
+            for call in tool_calls:
+                name = call["function"]["name"]
+                arguments = call["function"]["arguments"]
+                print(f"\n[Tool {name}: {arguments}]")
+                try:
+                    output = call_tool(name, arguments)
+                except Exception as e:
+                    output = f"Error calling '{name}': {e}"
+                messages.append({"role": "tool", "tool_name": name, "content": output})
+            continue
         break
 
 
@@ -171,6 +173,10 @@ def main():
         return
     if not check_ollama(model, url):
         return
+    try:
+        TOOLS.extend(get_tools())
+    except Exception as e:
+        print(f"MCP server unavailable, continuing without tools: {e}")
     system_message = build_system_prompt(persona_text)
     messages = [system_message]
 

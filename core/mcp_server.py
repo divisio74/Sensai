@@ -13,7 +13,7 @@ mcp = FastMCP("web-search")
 
 
 @mcp.tool()
-def web_search(query):
+def web_search(query: str, freshness: str = "noLimit") -> str:
     api_key = os.getenv("LANGSEARCH_API_KEY")
     if not api_key:
         raise RuntimeError("LANGSEARCH_API_KEY is not set")
@@ -23,7 +23,8 @@ def web_search(query):
         data=json.dumps({
             "query": query,
             "count": MAX_RESULTS,
-            "contents": {"text": True},
+            "freshness": freshness,
+            "summary": True,
         }).encode(),
         headers={
             "Authorization": f"Bearer {api_key}",
@@ -48,7 +49,7 @@ def web_search(query):
         {
             "name": source.get("name", ""),
             "url": source.get("url", ""),
-            "text": (source.get("text") or "")[:MAX_TEXT_CHARS],
+            "summary": (source.get("summary") or "")[:MAX_TEXT_CHARS],
             "datePublished": source.get("datePublished", ""),
             "displayUrl": source.get("displayUrl", ""),
         }
