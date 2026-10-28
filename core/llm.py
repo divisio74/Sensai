@@ -1,7 +1,7 @@
 import requests
 import json
 
-def chat_with_tools(messages, model, url, tools=None):
+def stream_messages(messages, model, url, tools=None):
     payload = {
         "model": model,
         "messages": messages,
@@ -9,24 +9,30 @@ def chat_with_tools(messages, model, url, tools=None):
     }
     if tools:
         payload["tools"] = tools
+    response = requests.post(url, json=payload, stream=True, timeout=(5, 120))
+    response.raise_for_status()
+    for line in response.iter_lines():
+        if not line:
+            continue
+        chunk = json.loads(line)
+        yield chunk["message"]
+
+def stream_chat(messages, model, url):
+    for message in stream_messages(messages, model, url):
+        yield message["content"]
+
+def chat_with_tools(messages, model, url, tools=None):
     full_reply = ""
     tool_calls = []
     try:
-        response = requests.post(url, json=payload, stream=True, timeout=(5, 120))
-
-        if response.status_code != 200:
-            print("Bad url OR model ! : ", response.status_code)
-            return None
-
-        for line in response.iter_lines():
-            if not line:
-                continue
-            chunk = json.loads(line)
-            message = chunk["message"]
+        for message in stream_messages(messages, model, url, tools):
             morceau = message["content"]
             print(morceau, end="", flush=True)
             full_reply += morceau
             tool_calls.extend(message.get("tool_calls") or [])
+    except requests.exceptions.HTTPError as e:
+        print("Bad url OR model ! : ", e.response.status_code)
+        return None
     except requests.exceptions.Timeout:
             print("\nOllama stopped responding (timeout)")
             return None
