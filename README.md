@@ -52,6 +52,8 @@ Every feature has its user stories and acceptance criteria in
 - A LangSearch API key
 - `requests` and `python-dotenv`
 - `fastapi` and `uvicorn` (only for the web interface)
+- [Docker](https://docs.docker.com/engine/install/), usable without `sudo`, for the isolated code
+  sandbox (without it, Sensia falls back to a local process and says so)
 
 ```bash
 python3 -m venv .venv
@@ -59,6 +61,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ollama pull qwen2.5:3b
 ollama pull nomic-embed-text
+docker pull python:3.12-slim
 ```
 
 Set `LANGSEARCH_API_KEY` in a `.env` file at the project root. The test runner loads this file
@@ -79,8 +82,8 @@ python3 main.py --help
 ## Configuration
 
 Every tunable value lives in [`config.toml`](config.toml), grouped by feature and commented:
-Ollama URLs and timeouts, RAG threshold and chunk size, code-loop iterations and sandbox
-timeout, web-search limits, web server port, `/fast` settings. `--model` and `--url` override
+Ollama URLs and timeouts, RAG threshold and chunk size, code-loop iterations, sandbox mode,
+timeout and Docker limits, web-search limits, web server port, `/fast` settings. `--model` and `--url` override
 the file for one session.
 
 Generation parameters are sent to Ollama as `options`, with one value per usage:
@@ -466,8 +469,32 @@ kind of object — it is just another message in the conversation. That is the w
 Generated code is neither malicious nor trustworthy. With `exec()`, an infinite loop freezes the
 agent permanently — Python has no way to interrupt a running statement. A child process can be
 killed by the OS, which gives us a timeout, protects our own variables from being overwritten,
-and separates stdout/stderr for free. It is also the only form that *could* later be given
-resource limits or filesystem isolation.
+and separates stdout/stderr for free.
+
+### A Docker container per execution
+
+A child process still runs with the user's rights: it can read their files, open a network
+connection, and read the environment variables, including the LangSearch key that `main.py`
+loads from `.env`. Each generated program therefore runs in a throw-away container
+(`tools/sandbox.py`, settings in `[code.docker]` of `config.toml`):
+
+| Protection | How |
+|---|---|
+| No access to the user's files | only the image's file system, read-only (`--read-only`); the only writable place is a 64 MB `/tmp` in memory |
+| No network | `--network none` |
+| No secret | the container does not inherit Sensia's environment: no `LANGSEARCH_API_KEY` |
+| No privileges | user `nobody` (`--user 65534`), `--cap-drop ALL`, `--security-opt no-new-privileges` |
+| Bounded resources | 256 MB of RAM swap included, 1 CPU, 64 processes |
+| Bounded time | `timeout` inside the container, and the container is killed if it does not stop |
+| Nothing left behind | `--rm`: the container is deleted after each run |
+
+The cost is small: **0.2 to 0.5 s** per execution. The trade-off is that the image only has the
+standard library: code that imports `numpy` fails, and the loop then tries without it.
+
+Without Docker (for instance on a teammate's machine), the code falls back to a local process,
+with a warning. That process is hardened too (empty temporary directory, cleaned environment
+without the key, Python in isolated mode `-I`), but it is not isolated from the machine.
+`fallback_to_process = false` refuses to run code without Docker.
 
 ### Execution-grounded reflection, not self-critique
 
@@ -550,6 +577,11 @@ than on a belief about training data.
 |---|---|
 | Self-correction, naive `fib(42)` | success in 3 attempts, 36.8 s (2 timeouts, then memoisation) |
 | Stagnation detection (fake `chat`, always same code) | `run_python` called **1×** instead of 3× |
+| Docker sandbox: `os.listdir('/home')` | `[]` (the jury's example, which used to list the real folders) |
+| Docker sandbox: `LANGSEARCH_API_KEY` visible | `False` |
+| Docker sandbox: network, write outside `/tmp` | `Network is unreachable`, `Read-only file system` |
+| Docker sandbox: infinite loop, 400 MB allocation, process bomb | stopped at the timeout, killed at 256 MB, blocked after 62 processes |
+| Docker sandbox: cost of a run | 0.2 to 0.5 s; naive `fib(42)` still corrected in 2 attempts (18 s) |
 | Format compliance, FR vs EN system prompt | 6/6 vs 6/6 |
 | Effective context window | 4096 tokens (`ollama ps`), model capacity 32768 |
 
@@ -570,12 +602,12 @@ answer. Verifying correctness requires a reference *external* to the system that
 code (user-provided tests, invariants, a second implementation). Sensia does not have one, so
 `success` should be read as *"ran without error"*, not *"is correct"*.
 
-**The sandbox isolates the process, not the system.** `subprocess` protects the agent from
-crashes, infinite loops and variable collisions. It does **not** prevent generated code from
-writing to the filesystem or opening a network connection — it runs with the user's own rights.
-The threat model covered here is *accidentally destructive LLM output*, not a determined
-attacker. Filesystem isolation (temporary working directory), a cleaned environment and
-`resource.setrlimit` caps are the natural next step.
+**The sandbox depends on Docker.** With Docker, generated code cannot see the user's files,
+the network or the API key (see [A Docker container per execution](#a-docker-container-per-execution)).
+A container shares the host's kernel: it protects against *accidentally destructive or
+indiscreet LLM output*, not against a determined attacker exploiting a kernel flaw, which would
+need a virtual machine. Without Docker, the fallback process is hardened but runs with the
+user's rights. The image only contains the Python standard library.
 
 **Contradictory tasks.** A task can be impossible as stated (e.g. "compute fib(42) with naive
 recursion" cannot finish within the execution budget). The model then oscillates between the
@@ -602,11 +634,10 @@ oldest part of the prompt.
 - Persistence of the conversation history across sessions (the user profile and remembered
   facts do persist)
 - Context compaction for long conversations (the chat history grows unbounded)
-- Real isolation of the sandbox (container or dedicated user without network)
 
 Implemented since the mid-term review: the configuration file (`config.toml`), structured
 output (JSON schema for the `/fast` plan), native tool calling through MCP, persona switching
-mid-session.
+mid-session, the isolated Docker sandbox.
 
 ---
 
@@ -644,5 +675,5 @@ persona/
     user.md              the user profile, completed by /remember
 docs/user_stories/       user stories of every feature + traceability table
 tools/
-    sandbox.py           run_python(code, timeo=10) -> dict
+    sandbox.py           run_python(code, timeo) -> dict: Docker container, or hardened process
 ```

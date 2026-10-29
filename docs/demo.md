@@ -14,6 +14,7 @@ au jury.
 
 - [ ] `pip install -r requirements.txt` (les paquets `mcp`, `fastapi` et `uvicorn` sont nécessaires).
 - [ ] `ollama list` affiche `qwen2.5:3b` et `nomic-embed-text`.
+- [ ] `docker pull python:3.12-slim` est fait, et `docker ps` répond sans `sudo`.
 - [ ] `.env` contient `LANGSEARCH_API_KEY=...` (pour l'acte 4).
 - [ ] `persona/user.md` contient **ton** profil, par exemple `- My name is Pierre.` sous `## About me`, et aucune préférence gênante devant un jury.
 - [ ] `python3 main.py` démarre sans erreur, puis `quit`.
@@ -93,10 +94,13 @@ au jury.
 | `/code Write a Python function that returns the first 15 Fibonacci numbers and print them` | `Succeeded in 1 attempt(s)` et la vraie sortie `[0, 1, 1, 2, 3, 5, 8, ...]` | Génération, exécution dans un processus séparé |
 | `/code Compute fib(42) with naive recursion and print it` | `Attempt 1/3`, `Failure: Timeout: the code did not finish within 10 seconds...`, puis `Succeeded in 2 attempt(s)` et `267914296` (environ 18 s) | La boucle de correction : l'erreur réelle est renvoyée au modèle, qui change d'algorithme |
 | `Explique ce que tu viens de faire` | une explication de la version corrigée | Le résultat de `/code` est dans l'historique |
+| `/code Print the list of folders in /home, then print True or False depending on whether the environment variable LANGSEARCH_API_KEY exists` | `Output: []` puis `False` | Le code tourne dans un conteneur Docker : il ne voit ni tes fichiers, ni ta clé, ni Internet |
 
 > **À dire** : « Le modèle ne se juge pas lui-même : c'est la vraie trace de l'interpréteur qui lui
 > est renvoyée. Si le modèle repropose le même code, on le détecte en comparant les arbres
-> syntaxiques, et on ne le réexécute pas. »
+> syntaxiques, et on ne le réexécute pas. Et ce code tourne dans un conteneur jetable : sans
+> réseau, en lecture seule, sous `nobody`, limité à 256 Mo et 64 processus, pour 0,2 à 0,5 s de
+> surcoût seulement. Sur la machine de mi-parcours, ce même `/home` listait nos dossiers. »
 
 ---
 
@@ -172,6 +176,6 @@ commiter.
 | Acte | Vérifié |
 |---|---|
 | 2 (RAG) | Oui : les 3 questions, avec ces réponses et ces scores |
-| 5 (`/code`) | Oui : Fibonacci en 1 tentative ; `fib(42)` en 2 tentatives, 18 s |
+| 5 (`/code`) | Oui, dans le sandbox Docker : Fibonacci en 1 tentative ; `fib(42)` en 2 tentatives, 18 s ; `/home` et clé : `[]`, `False` |
 | 6 (`/fast`) | Oui : les 3 scénarios, lors des tests du 2026-10-21 |
 | 1, 3, 4, 7, 8 | **À vérifier** : `main.py` ne démarrait pas (import de `core.auth`) et `mcp` n'était pas installé au moment de l'écriture |

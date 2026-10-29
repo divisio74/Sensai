@@ -165,6 +165,7 @@ is answered "yes". Measured on 2026-10-21.
 | Stagnation detection (stub model, always the same code) | code executed 1 time instead of 3 |
 | 5 reference tasks, `qwen2.5:3b` | 4/5 successes, 1 attempt on average |
 | 5 reference tasks, `llama3.2:3b` | 5/5 successes, 1.4 attempts: corrections made the difference |
+| Docker sandbox, cost of one execution | 0.2 to 0.5 s (container start included) |
 
 Not measured yet: the success rate on the same tasks **without** the loop (a single attempt),
 which would isolate the gain brought by the correction.
