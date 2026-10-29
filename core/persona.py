@@ -1,3 +1,4 @@
+from datetime import date
 from pathlib import Path
 
 path = Path(__file__).resolve()
@@ -28,7 +29,7 @@ def remember(fact):
         f.write(f"- {fact.strip()}\n")
 
 def build_system_prompt(persona_text, user_profile=""):
-    content = persona_text
+    content = f"{persona_text}\n\nToday's date is {date.today().isoformat()}."
     if user_profile:
         content += "\n\nAbout the user you are talking to. Their preferences below override your default behavior:\n" + user_profile
     return {"role": "system", "content": content}

@@ -3,8 +3,17 @@ import os
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
+from mcp.server.fastmcp import FastMCP
 
-def internet_search(query):
+
+MAX_RESULTS = 3
+MAX_TEXT_CHARS = 2000
+
+mcp = FastMCP("web-search")
+
+
+@mcp.tool()
+def web_search(query: str, freshness: str = "noLimit") -> str:
     api_key = os.getenv("LANGSEARCH_API_KEY")
     if not api_key:
         raise RuntimeError("LANGSEARCH_API_KEY is not set")
@@ -13,8 +22,9 @@ def internet_search(query):
         "https://api.langsearch.com/v1/web-search",
         data=json.dumps({
             "query": query,
-            "count": 50,
-            "contents": {"text": True},
+            "count": MAX_RESULTS,
+            "freshness": freshness,
+            "summary": True,
         }).encode(),
         headers={
             "Authorization": f"Bearer {api_key}",
@@ -28,15 +38,24 @@ def internet_search(query):
         raise RuntimeError(f"LangSearch returned HTTP {error.code}") from error
     except (URLError, TimeoutError) as error:
         raise RuntimeError(f"Unable to reach LangSearch: {error}") from error
+    except (json.JSONDecodeError, ValueError) as error:
+        raise RuntimeError("Invalid response from LangSearch") from error
 
-    sources = result["data"]["webPages"]["value"]
+    try:
+        sources = result["data"]["webPages"]["value"]
+    except (KeyError, TypeError):
+        sources = []
     return json.dumps([
         {
             "name": source.get("name", ""),
             "url": source.get("url", ""),
-            "text": source.get("text", ""),
+            "summary": (source.get("summary") or "")[:MAX_TEXT_CHARS],
             "datePublished": source.get("datePublished", ""),
             "displayUrl": source.get("displayUrl", ""),
         }
-        for source in sources
+        for source in sources[:MAX_RESULTS]
     ], ensure_ascii=False)
+
+
+if __name__ == "__main__":
+    mcp.run()
