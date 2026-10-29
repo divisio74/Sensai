@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 from core.llm import chat_with_tools
 from core.mcp_client import get_tools, call_tool
-from core.persona import PERSONAS_DIR, load_persona, build_system_prompt
+from core.persona import load_persona, build_system_prompt, get_persona_name, load_user_profile, remember, list_personas
 from timepred.runner import run as run_timed
 from core.commands import handle_command
 from web import run
@@ -86,8 +86,9 @@ def run_requested_fast(task, seconds, model, url, persona):
 def u_send_message_a(content, messages, model, url, persona):
     messages.append({"role": "user", "content": content})
     tool_rounds, fast_runs = 0, 0
+    persona_name = get_persona_name(persona)
     while True:
-        print("Sensia: ", end="", flush=True)
+        print(f"{persona_name}: ", end="", flush=True)
         result = chat_with_tools(messages, model, url, TOOLS)
         if result is None:
             messages.pop()
@@ -164,7 +165,7 @@ def main():
     try:
         persona_text = load_persona(persona)
     except FileNotFoundError:
-        available = ", ".join(sorted(path.stem for path in PERSONAS_DIR.glob("*.md")))
+        available = ", ".join(list_personas())
         print(f"Unknown persona '{persona}'. Available: {available}")
         return
     if not check_ollama(model, url):
@@ -176,7 +177,7 @@ def main():
         TOOLS.extend(get_tools())
     except Exception as e:
         print(f"MCP server unavailable, continuing without tools: {e}")
-    system_message = build_system_prompt(persona_text)
+    system_message = build_system_prompt(persona_text, load_user_profile())
     messages = [system_message]
 
     while True:
@@ -191,6 +192,27 @@ def main():
 
         if user_input == "quit":
             break
+
+        if user_input.startswith("/remember "):
+            fact = user_input[len("/remember "):]
+            if not fact.strip():
+                print("Usage: /remember <fact>")
+                continue
+            remember(fact)
+            messages[0] = build_system_prompt(load_persona(persona), load_user_profile())
+            print("Fact remembered.")
+            continue
+        
+        if user_input == "/persona" or user_input.startswith("/persona "):
+            new_persona = user_input[len("/persona"):].strip()
+            if new_persona not in list_personas():
+                print(f"Current persona: {persona}. Available: {', '.join(list_personas())}")
+                continue
+            persona = new_persona
+            messages[0] = build_system_prompt(load_persona(persona), load_user_profile())
+            print(f"Switched to {get_persona_name(persona)} (conversation kept)")
+            continue
+
 
         output = handle_command(user_input, messages, model, url)
         if output is not None:

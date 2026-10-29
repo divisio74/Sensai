@@ -36,6 +36,7 @@ with `python-dotenv`.
 python3 main.py
 python3 main.py --model qwen2.5:7b
 python3 main.py --url http://other-host:11434/api/chat
+python3 main.py --persona dev
 python3 main.py --web
 python3 main.py --help
 ```
@@ -62,6 +63,9 @@ python3 tests/main.py
 | `/rag <question>` | answers from the documents and lists the sources | ✅ |
 | `/code <task>` | runs the self-correcting code agent on `<task>` (Python only) | ✅ (code and output shown) |
 | `/fast <seconds> <task>` | runs a task within a time budget | ❌ terminal only |
+| `/persona` | shows the current persona and the available ones | ❌ terminal only |
+| `/persona <name>` | switches persona mid-conversation, the history is kept | ❌ terminal only |
+| `/remember <fact>` | saves a fact in the user profile, used right away and in later sessions | ❌ terminal only |
 | `quit` | exits | — |
 | `Ctrl+C` / `Ctrl+D` | exits cleanly | — |
 
@@ -129,6 +133,84 @@ type checking, at the cost of a toolchain far heavier than this interface needs.
 
 ---
 
+## Persona and user profile
+
+The system prompt (the first message of the conversation) is built from two Markdown files:
+who the assistant is, and who the user is.
+
+```
+persona/personas/<name>.md   the assistant: name (first "# " line), tone, role, values
+persona/user.md              the user: about me, preferences, remembered facts
+```
+
+```
+messages[0] = {"role": "system", "content":
+    <persona/personas/sensia.md>
+    Today's date is 2026-10-29.
+    About the user you are talking to. Their preferences below override your default behavior:
+    <persona/user.md>
+}
+```
+
+```
+python3 main.py --persona dev        start with another persona
+You: /persona dev                    switch mid-conversation
+Switched to SENSIA — developer mode (conversation kept)
+You: /remember I am allergic to penicillin
+Fact remembered.
+```
+
+User stories: [`docs/user_stories/persona.md`](docs/user_stories/persona.md) and
+[`docs/user_stories/profile.md`](docs/user_stories/profile.md).
+
+### Technical decisions
+
+**Markdown files, not strings in the code.** A new assistant is a new file in
+`persona/personas/`: no Python to change. The terminal name is read from the `# ` title, so the
+name shown and the name the model is told are always the same. Markdown is plain text the model
+reads as-is and a human edits easily, so no parser is needed.
+
+**Switching only replaces `messages[0]`.** The persona is just the first message of the list.
+`/persona` rebuilds it and leaves every other message untouched, so the new persona keeps the
+whole conversation. `/remember` uses the same mechanism to refresh the profile immediately.
+
+**Two files: the assistant is read-only, the user profile is writable.** `/remember` only ever
+writes to `persona/user.md`. If facts could be written into the persona file, a user could make
+the assistant "remember" that it has no rules anymore, and that change would be permanent.
+
+**Only listed personas can be loaded.** `/persona` checks the name against `list_personas()`
+(the files of `persona/personas/`) before reading anything, so `/persona ../user` cannot load
+another file as a persona.
+
+**The profile comes after the persona, with a priority sentence.** The persona sets the default
+behaviour, the profile adapts it to one user. The heading "About the user you are talking to"
+tells the model the facts describe the user, not itself.
+
+### Measurements
+
+| Test (`llama3.2`, 4 runs) | Result |
+|---|---|
+| Profile preference that adds to the persona ("Always call me Daddy Boy") | applied 3/4 |
+| Profile preference that contradicts the persona ("never give me the answer" vs "give short, working examples") | applied 0/4 |
+| Fact given before `/persona dev`, asked after | remembered |
+| Fact saved with `/remember`, asked after restarting Sensia | remembered |
+
+### Limitations
+
+- When the profile contradicts the persona, a small model follows the persona, even with the
+  priority sentence: the profile works for preferences that complete the persona.
+- Saying "remember that..." in plain language does nothing: `/remember` must be typed. A
+  `remember` tool called by the model, like `web_search`, is the natural next step.
+- `/remember` alone (no text) answers `Unknown command`, and `/persona` and `/remember` are not
+  listed in `/help`.
+- The web interface uses the persona chosen at launch, but neither the user profile nor
+  `/persona` / `/remember`.
+- Facts are appended at the end of `user.md`, so `## Remembered facts` must stay the last
+  section, and the profile grows without limit in a 4096-token context.
+- `persona/user.md` is versioned, so the whole team shares one profile.
+
+---
+
 ## Architecture
 
 ```
@@ -136,6 +218,7 @@ main.py                  CLI, chat history, command dispatch
 │
 ├── core/commands.py     commands shared by the CLI and the web (/help, /undo, /rag, /code...)
 ├── core/llm.py          HTTP transport to Ollama, NDJSON streaming (stream_chat, chat)
+├── core/persona.py      persona and user profile -> system prompt
 ├── core/boucle.py       the reflection loop  (code_cycle)
 ├── core/code_extract.py pulls Python out of the model's markdown answer
 ├── tools/sandbox.py     runs code in a subprocess  (run_python)
@@ -296,7 +379,8 @@ instruction-following and role tracking than a 7B. The model is selectable at ru
 - Configuration file (the spec allows *CLI argument **or*** config file; only CLI is implemented)
 - Structured output / JSON schema-constrained decoding
 - Native tool calling
-- Persistence across sessions
+- Persistence of the conversation history across sessions (the user profile and remembered
+  facts do persist)
 - Context compaction for long conversations (the chat history grows unbounded)
 
 ---
@@ -316,6 +400,12 @@ core/
                          chat(messages, model, url) -> str | None
     boucle.py            code_cycle(task, model, url, max_iterations=3) -> dict
     code_extract.py      extract_code(text) -> str
+    persona.py           load_persona(id), list_personas(), get_persona_name(id),
+                         load_user_profile(), remember(fact), build_system_prompt(...)
+persona/
+    personas/*.md        one file per assistant persona (sensia, dev)
+    user.md              the user profile, completed by /remember
+docs/user_stories/       user stories (dev, persona, profile)
 tools/
     sandbox.py           run_python(code, timeo=10) -> dict
 info.md                  team task split
