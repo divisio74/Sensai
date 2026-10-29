@@ -9,6 +9,9 @@ from core.persona import load_persona, build_system_prompt, get_persona_name, lo
 from timepred.runner import run as run_timed
 from core.commands import handle_command
 from web import run
+from getpass import getpass
+from core.auth import login, register, user_exists
+
 
 
 MAX_TOOL_ROUNDS = 3
@@ -127,7 +130,6 @@ def u_send_message_a(content, messages, model, url, persona):
             continue
         break
 
-
 def parse_args():
     parser = argparse.ArgumentParser(description="Sensia: Local assistant")
     parser.add_argument("--model", default="qwen2.5:3b", help="Ollama model to use (default: qwen2.5:3b)")
@@ -202,7 +204,7 @@ def main():
             messages[0] = build_system_prompt(load_persona(persona), load_user_profile())
             print("Fact remembered.")
             continue
-        
+
         if user_input == "/persona" or user_input.startswith("/persona "):
             new_persona = user_input[len("/persona"):].strip()
             if new_persona not in list_personas():
