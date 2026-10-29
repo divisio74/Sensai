@@ -11,6 +11,9 @@ def load_persona(persona_id):
     text = real_path.read_text(encoding="utf-8")
     return text
 
+def list_personas():
+    return sorted(path.stem for path in PERSONAS_DIR.glob("*.md"))
+
 def get_persona_name(persona_id):
     text = load_persona(persona_id)
     for line in text.splitlines():
