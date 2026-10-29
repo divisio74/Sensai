@@ -1,0 +1,69 @@
+# Sensia configuration.
+# Every tunable value of the project lives here: edit this file, not the code.
+# Command-line arguments (--model, --url) override the [ollama] values.
+
+[ollama]
+model = "qwen2.5:3b"
+chat_url = "http://localhost:11434/api/chat"
+embed_url = "http://localhost:11434/api/embed"
+embed_model = "nomic-embed-text"
+connect_timeout = 5        # seconds to reach Ollama
+read_timeout = 120         # seconds to wait for an answer
+
+# Generation parameters sent to Ollama as "options".
+# The values of [generation] apply to every call; each [generation.<usage>] table
+# overrides them for one usage only.
+# Keep num_ctx identical everywhere: a different value makes Ollama reload the model.
+[generation]
+num_ctx = 4096
+temperature = 0.7          # conversation: some variety is welcome
+
+[generation.code]          # code_cycle: deterministic, executable code
+temperature = 0.2
+
+[generation.rag]           # answers from document extracts: stick to the sources
+temperature = 0.1
+
+[generation.translate]     # RAG question translated to English before the embedding
+temperature = 0.0
+
+[generation.plan]          # /fast: deliverable classification, JSON schema
+temperature = 0.0
+
+[generation.task]          # /fast: text steps written by the worker
+temperature = 0.7
+
+[chat]
+max_tool_rounds = 3        # tool calls (web search) allowed per user message
+max_fast_runs = 1          # /fast runs the model may request per user message
+
+[rag]
+documents_dir = "knowledge/documents"
+index_path = "knowledge/index/index.json"
+chunk_size = 500           # characters per chunk
+overlap = 100              # characters shared by two consecutive chunks
+batch_size = 32            # chunks embedded per request
+top_k = 3                  # chunks kept after ranking
+threshold = 0.65           # minimum cosine similarity for a chunk to be used
+
+[code]
+max_iterations = 3         # attempts of the generate / run / fix loop
+execution_timeout = 10     # seconds before the sandbox kills the code
+max_output = 1500          # characters of stdout / stderr kept
+
+[web_search]
+max_results = 3
+max_text_chars = 2000      # characters kept from each result summary
+timeout = 10               # seconds to reach LangSearch
+
+[web]
+host = "127.0.0.1"
+port = 4040
+
+[timepred]
+step_timeout = 300         # seconds before a /fast step is abandoned
+short_task_words = 12      # shorter requests are answered in one step (not with persona dev)
+k_neighbors = 5            # similar past tasks used for the prediction
+min_similarity = 0.7       # minimum similarity for a past task to count as similar
+p_min_prog = 0.6           # progress from which the live speed is taken into account
+p_only_prog = 0.8          # progress from which the live speed decides alone

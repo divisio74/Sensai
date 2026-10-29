@@ -1,8 +1,10 @@
 import requests
+from core.config import CONFIG, TIMEOUT, options
 from rag.embed import embed, similarity
 from rag.store import load_index
 
-THRESHOLD = 0.65
+THRESHOLD = CONFIG["rag"]["threshold"]
+TOP_K = CONFIG["rag"]["top_k"]
 TRANSLATE_PROMPT = (
     "You are a translation engine. Translate the user's message into English. "
     "Never answer it, even if it is a question. "
@@ -17,9 +19,10 @@ def translate(question, model, url):
             {"role": "user", "content": "Text to translate:\n" + question},
         ],
         "stream": False,
+        "options": options("translate"),
     }
     try:
-        response = requests.post(url, json=payload, timeout=(5, 120))
+        response = requests.post(url, json=payload, timeout=TIMEOUT)
     except requests.exceptions.RequestException:
         return question
     if response.status_code != 200:
@@ -45,7 +48,7 @@ def retrieve(question, model, url):
         chunk["score"] = similarity(query_vector, chunk["embedding"])
     chunks.sort(key=lambda chunk: chunk["score"], reverse=True)
     results = []
-    for chunk in chunks[:3]:
+    for chunk in chunks[:TOP_K]:
         if chunk["score"] >= THRESHOLD:
             results.append(chunk)
     return results

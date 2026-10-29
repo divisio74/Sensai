@@ -6,6 +6,7 @@ from pathlib import Path
 
 import requests
 
+from core.config import options
 from timepred.llm import STEP_TIMEOUT
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -30,7 +31,7 @@ def run_worker(step_json):
             f"Your step: {step['name']}"},
     ]
     with requests.post(step["url"], json={"model": step["model"], "messages": messages,
-                                          "stream": True},
+                                          "stream": True, "options": options("task")},
                        stream=True, timeout=STEP_TIMEOUT) as response:
         response.raise_for_status()
         for line in response.iter_lines():

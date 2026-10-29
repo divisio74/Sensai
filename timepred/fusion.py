@@ -1,8 +1,10 @@
 import math
 
+from core.config import CONFIG
+
 C_PROG = 3.0
-P_MIN_PROG = 0.6
-P_ONLY_PROG = 0.8
+P_MIN_PROG = CONFIG["timepred"]["p_min_prog"]
+P_ONLY_PROG = CONFIG["timepred"]["p_only_prog"]
 
 
 def progression_prior(elapsed, p):

@@ -1,11 +1,13 @@
 import requests
 
-OLLAMA_URL = "http://localhost:11434/api/chat"
-STEP_TIMEOUT = 300
+from core.config import CONFIG, options
+
+OLLAMA_URL = CONFIG["ollama"]["chat_url"]
+STEP_TIMEOUT = CONFIG["timepred"]["step_timeout"]
 
 
-def ask_ollama(model, messages, url=OLLAMA_URL, schema=None):
-    payload = {"model": model, "messages": messages, "stream": False}
+def ask_ollama(model, messages, url=OLLAMA_URL, schema=None, usage="plan"):
+    payload = {"model": model, "messages": messages, "stream": False, "options": options(usage)}
     if schema:
         payload["format"] = schema
     response = requests.post(url, json=payload, timeout=STEP_TIMEOUT)

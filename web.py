@@ -3,12 +3,13 @@ import requests
 from fastapi import FastAPI
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
+from core.config import CONFIG
 from core.llm import stream_chat
 from core.persona import load_persona, build_system_prompt
 from core.commands import handle_command
 
-HOST = "127.0.0.1"
-PORT = 4040
+HOST = CONFIG["web"]["host"]
+PORT = CONFIG["web"]["port"]
 MODEL = None
 OLLAMA_URL = None
 

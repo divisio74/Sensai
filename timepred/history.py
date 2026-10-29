@@ -3,6 +3,7 @@ import math
 import statistics
 from pathlib import Path
 
+from core.config import CONFIG
 from rag.embed import embed, similarity
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -10,8 +11,8 @@ HISTORY_PATH = ROOT / "knowledge" / "history" / "time_history.json"
 TASKS_PATH = ROOT / "knowledge" / "history" / "task_history.json"
 DEFAULT_MEAN = 20.0
 MIN_REL_STD = 0.25
-K_NEIGHBORS = 5
-MIN_SIMILARITY = 0.7
+K_NEIGHBORS = CONFIG["timepred"]["k_neighbors"]
+MIN_SIMILARITY = CONFIG["timepred"]["min_similarity"]
 MIN_NEIGHBOR_SAMPLES = 2
 MIN_CORRECTION_SAMPLES = 2
 CORRECTION_SHRINK = 3

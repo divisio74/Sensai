@@ -1,8 +1,11 @@
 import os
 
+from core.config import CONFIG, ROOT, path
+
 EXTENSIONS = (".md", ".txt", ".py")
-CHUNK_SIZE = 500
-OVERLAP = 100
+CHUNK_SIZE = CONFIG["rag"]["chunk_size"]
+OVERLAP = CONFIG["rag"]["overlap"]
+DOCUMENTS_DIR = path(CONFIG["rag"]["documents_dir"])
 
 def chunk_text(text, source):
     chunks = []
@@ -20,7 +23,7 @@ def chunk_text(text, source):
     return chunks
 
 def ingest():
-    folder="knowledge/documents"
+    folder = DOCUMENTS_DIR
     chunks = []
 
     for root, _, files in os.walk(folder):
@@ -34,5 +37,5 @@ def ingest():
             except (OSError, UnicodeDecodeError):
                 print(f"Cannot read {path}, skipped")
                 continue
-            chunks += chunk_text(text, path)
+            chunks += chunk_text(text, os.path.relpath(path, ROOT))
     return chunks

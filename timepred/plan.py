@@ -3,6 +3,7 @@ import re
 
 import requests
 
+from core.config import CONFIG
 from timepred.llm import ask_ollama
 
 CODE_TYPE = "code"
@@ -10,7 +11,7 @@ DIRECT_TYPE = "direct"
 DELIVERABLE_TYPES = {"text": "write", "code": CODE_TYPE, "explanation": "explain"}
 PRODUCTION_TYPES = {"write", CODE_TYPE, "explain", DIRECT_TYPE}
 PRUNABLE_TYPES = {"research"}
-SHORT_TASK_WORDS = 12
+SHORT_TASK_WORDS = CONFIG["timepred"]["short_task_words"]
 
 CLASSIFY_SCHEMA = {
     "type": "object",

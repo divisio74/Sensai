@@ -1,7 +1,9 @@
 import json
 import os
 
-INDEX_PATH = "knowledge/index/index.json"
+from core.config import CONFIG, path
+
+INDEX_PATH = path(CONFIG["rag"]["index_path"])
 
 def save_index(chunks):
     os.makedirs(os.path.dirname(INDEX_PATH), exist_ok=True)

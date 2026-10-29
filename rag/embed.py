@@ -1,12 +1,14 @@
 import requests
 
-EMBED_MODEL = "nomic-embed-text"
-EMBED_URL = "http://localhost:11434/api/embed"
-BATCH_SIZE = 32
+from core.config import CONFIG, TIMEOUT
+
+EMBED_MODEL = CONFIG["ollama"]["embed_model"]
+EMBED_URL = CONFIG["ollama"]["embed_url"]
+BATCH_SIZE = CONFIG["rag"]["batch_size"]
 
 def embed(texts):
     try:
-        response = requests.post(EMBED_URL, json={"model": EMBED_MODEL, "input": texts}, timeout=(5, 120))
+        response = requests.post(EMBED_URL, json={"model": EMBED_MODEL, "input": texts}, timeout=TIMEOUT)
     except requests.exceptions.RequestException as e:
         print(f"Embeddind error: {e}")
         return None
