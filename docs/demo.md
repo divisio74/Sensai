@@ -16,7 +16,7 @@ au jury.
 - [ ] `ollama list` affiche `qwen2.5:3b` et `nomic-embed-text`.
 - [ ] `docker pull python:3.12-slim` est fait, et `docker ps` répond sans `sudo`.
 - [ ] `.env` contient `LANGSEARCH_API_KEY=...` (pour l'acte 4).
-- [ ] `persona/user.md` contient **ton** profil, par exemple `- My name is Pierre.` sous `## About me`, et aucune préférence gênante devant un jury.
+- [ ] `persona/user.md` existe et contient **ton** profil (sinon : `cp persona/user.example.md persona/user.md`), par exemple `- My name is Pierre.` sous `## About me`. Ce fichier est local et ignoré par git.
 - [ ] `python3 main.py` démarre sans erreur, puis `quit`.
 - [ ] **Faire chauffer le modèle** : lancer une fois `/fast 30 Écris un mail de relance pour lundi`. Sinon, le premier appel coûte environ 10 s de chargement.
 - [ ] Ne pas vider `knowledge/history/` : c'est lui qui rend les prédictions de `/fast` précises.
@@ -166,8 +166,8 @@ arrive dès le départ, répondre `y` pour atteindre celle du milieu.
 | Une réponse part en anglais | Sans gravité : le modèle de 3B suit la langue la plupart du temps, pas toujours |
 | Une étape bloque | `Ctrl+C` arrête la réponse en cours, pas Sensia |
 
-**Après la démo** : `/remember` a écrit dans `persona/user.md`. Retirer la ligne ajoutée avant de
-commiter.
+**Après la démo** : `/remember` a écrit dans `persona/user.md`. Ce fichier est ignoré par git :
+rien ne part dans un commit, mais on peut retirer la ligne pour la démo suivante.
 
 ---
 

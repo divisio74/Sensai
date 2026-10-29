@@ -60,7 +60,7 @@ You: /persona dev
 Switched to SENSIA — developer mode (conversation kept)
 
 You: What language do I love?
-SENSIA — developer mode: Daddy Boy, you love Rust.
+SENSIA — developer mode: Captain, you love Rust.
      → nouveau nom, historique conservé, profil toujours appliqué
 
 You: /persona ../user

@@ -62,6 +62,7 @@ pip install -r requirements.txt
 ollama pull qwen2.5:3b
 ollama pull nomic-embed-text
 docker pull python:3.12-slim
+cp persona/user.example.md persona/user.md   # your own profile, never committed
 ```
 
 Set `LANGSEARCH_API_KEY` in a `.env` file at the project root. The test runner loads this file
@@ -210,7 +211,8 @@ who the assistant is, and who the user is.
 
 ```
 persona/personas/<name>.md   the assistant: name (first "# " line), tone, role, values
-persona/user.md              the user: about me, preferences, remembered facts
+persona/user.md              the user: about me, preferences, remembered facts (local, not versioned)
+persona/user.example.md      the empty template it is created from
 ```
 
 ```
@@ -244,6 +246,10 @@ reads as-is and a human edits easily, so no parser is needed.
 `/persona` rebuilds it and leaves every other message untouched, so the new persona keeps the
 whole conversation. `/remember` uses the same mechanism to refresh the profile immediately.
 
+**One profile per user, outside git.** `persona/user.md` holds personal information, so it is
+ignored by git: each user copies `persona/user.example.md` or simply runs `/remember`, which
+creates the file from the template. Without it, Sensia runs normally, without a profile.
+
 **Two files: the assistant is read-only, the user profile is writable.** `/remember` only ever
 writes to `persona/user.md`. If facts could be written into the persona file, a user could make
 the assistant "remember" that it has no rules anymore, and that change would be permanent.
@@ -260,7 +266,7 @@ tells the model the facts describe the user, not itself.
 
 | Test (`llama3.2`, 4 runs) | Result |
 |---|---|
-| Profile preference that adds to the persona ("Always call me Daddy Boy") | applied 3/4 |
+| Profile preference that adds to the persona (a nickname: "Always call me ...") | applied 3/4 |
 | Profile preference that contradicts the persona ("never give me the answer" vs "give short, working examples") | applied 0/4 |
 | Fact given before `/persona dev`, asked after | remembered |
 | Fact saved with `/remember`, asked after restarting Sensia | remembered |
@@ -277,7 +283,8 @@ tells the model the facts describe the user, not itself.
   `/persona` / `/remember`.
 - Facts are appended at the end of `user.md`, so `## Remembered facts` must stay the last
   section, and the profile grows without limit in a 4096-token context.
-- `persona/user.md` is versioned, so the whole team shares one profile.
+- The profile is a local file: it is not shared between machines (it is ignored by git on
+  purpose, since it holds personal information).
 
 ---
 
@@ -672,7 +679,8 @@ benchmarks/
     models.py            speed, memory and code-loop success of several models
 persona/
     personas/*.md        one file per assistant persona (sensia, dev)
-    user.md              the user profile, completed by /remember
+    user.example.md      empty profile template (versioned)
+    user.md              your own profile, completed by /remember (git-ignored)
 docs/user_stories/       user stories of every feature + traceability table
 tools/
     sandbox.py           run_python(code, timeo) -> dict: Docker container, or hardened process

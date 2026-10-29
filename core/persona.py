@@ -5,6 +5,7 @@ path = Path(__file__).resolve()
 racine = path.parent.parent
 PERSONAS_DIR = racine / "persona" / "personas"
 USER_FILE = racine / "persona" / "user.md"
+USER_TEMPLATE = racine / "persona" / "user.example.md"
 
 def load_persona(persona_id):
     real_path = PERSONAS_DIR / f"{persona_id}.md"
@@ -28,6 +29,8 @@ def load_user_profile():
     return USER_FILE.read_text(encoding="utf-8")
 
 def remember(fact):
+    if not USER_FILE.exists() and USER_TEMPLATE.exists():
+        USER_FILE.write_text(USER_TEMPLATE.read_text(encoding="utf-8"), encoding="utf-8")
     with open(USER_FILE, "a", encoding="utf-8") as f:
         f.write(f"- {fact.strip()}\n")
 
