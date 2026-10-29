@@ -1,15 +1,18 @@
 import requests
 import json
 
-def stream_messages(messages, model, url, tools=None):
+from core.config import TIMEOUT, options
+
+def stream_messages(messages, model, url, tools=None, usage=None):
     payload = {
         "model": model,
         "messages": messages,
         "stream": True,
+        "options": options(usage),
     }
     if tools:
         payload["tools"] = tools
-    response = requests.post(url, json=payload, stream=True, timeout=(5, 120))
+    response = requests.post(url, json=payload, stream=True, timeout=TIMEOUT)
     response.raise_for_status()
     for line in response.iter_lines():
         if not line:
@@ -17,15 +20,15 @@ def stream_messages(messages, model, url, tools=None):
         chunk = json.loads(line)
         yield chunk["message"]
 
-def stream_chat(messages, model, url):
-    for message in stream_messages(messages, model, url):
+def stream_chat(messages, model, url, usage=None):
+    for message in stream_messages(messages, model, url, usage=usage):
         yield message["content"]
 
-def chat_with_tools(messages, model, url, tools=None):
+def chat_with_tools(messages, model, url, tools=None, usage=None):
     full_reply = ""
     tool_calls = []
     try:
-        for message in stream_messages(messages, model, url, tools):
+        for message in stream_messages(messages, model, url, tools, usage):
             morceau = message["content"]
             print(morceau, end="", flush=True)
             full_reply += morceau
@@ -50,6 +53,6 @@ def chat_with_tools(messages, model, url, tools=None):
     return full_reply, tool_calls
 
 
-def chat(messages, model, url):
-    result = chat_with_tools(messages, model, url)
+def chat(messages, model, url, usage=None):
+    result = chat_with_tools(messages, model, url, usage=usage)
     return result[0] if result else None

@@ -42,6 +42,30 @@ python3 main.py --help
 ```
 `--model`, `--url` and `--persona` work the same way with `--web`.
 
+## Configuration
+
+Every tunable value lives in [`config.toml`](config.toml), grouped by feature and commented:
+Ollama URLs and timeouts, RAG threshold and chunk size, code-loop iterations and sandbox
+timeout, web-search limits, web server port, `/fast` settings. `--model` and `--url` override
+the file for one session.
+
+Generation parameters are sent to Ollama as `options`, with one value per usage:
+
+| Usage | Temperature | Why |
+|---|---|---|
+| conversation | 0.7 | some variety is welcome |
+| code (`/code`, `code` steps of `/fast`) | 0.2 | stable, executable code |
+| RAG answer | 0.1 | stick to the document extracts |
+| RAG translation, `/fast` plan | 0 | deterministic, a single right answer |
+
+`num_ctx` (4096) is the same for every usage: a different value would make Ollama reload the
+model between two calls.
+
+## User stories
+
+The user stories, their acceptance criteria and the traceability table (feature → need →
+story → code → verification) are in [`docs/user_stories/`](docs/user_stories/README.md).
+
 ## Tests
 
 The LangSearch integration test can be launched independently:

@@ -65,7 +65,7 @@ def rag(question, messages, model, url):
     prompt = build_prompt(question, results)
     messages.append({"role": "user", "content": prompt, "display": "/rag " + question})
     print("Sensia: ", end="", flush=True)
-    reply = chat(messages, model, url)
+    reply = chat(messages, model, url, usage="rag")
     if reply is None:
         messages.pop()
         return "Sensia could not answer (is Ollama running?)"

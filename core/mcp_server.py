@@ -1,13 +1,19 @@
 import json
 import os
+import sys
+from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 from mcp.server.fastmcp import FastMCP
 
+# launched as a script by the MCP client: make the project root importable
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from core.config import CONFIG  # noqa: E402
 
-MAX_RESULTS = 3
-MAX_TEXT_CHARS = 2000
+MAX_RESULTS = CONFIG["web_search"]["max_results"]
+MAX_TEXT_CHARS = CONFIG["web_search"]["max_text_chars"]
+TIMEOUT = CONFIG["web_search"]["timeout"]
 
 mcp = FastMCP("web-search")
 
@@ -32,7 +38,7 @@ def web_search(query: str, freshness: str = "noLimit") -> str:
         },
     )
     try:
-        with urlopen(request, timeout=10) as response:
+        with urlopen(request, timeout=TIMEOUT) as response:
             result = json.load(response)
     except HTTPError as error:
         raise RuntimeError(f"LangSearch returned HTTP {error.code}") from error

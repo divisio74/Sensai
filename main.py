@@ -3,6 +3,7 @@ import json
 import requests
 from dotenv import load_dotenv
 
+from core.config import CONFIG, TIMEOUT, options
 from core.llm import chat_with_tools
 from core.mcp_client import get_tools, call_tool
 from core.persona import load_persona, build_system_prompt, get_persona_name, load_user_profile, remember, list_personas
@@ -14,8 +15,8 @@ from core.auth import login, register, user_exists
 
 
 
-MAX_TOOL_ROUNDS = 3
-MAX_FAST_RUNS = 1
+MAX_TOOL_ROUNDS = CONFIG["chat"]["max_tool_rounds"]
+MAX_FAST_RUNS = CONFIG["chat"]["max_fast_runs"]
 TOOLS = []
 
 
@@ -132,8 +133,8 @@ def u_send_message_a(content, messages, model, url, persona):
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Sensia: Local assistant")
-    parser.add_argument("--model", default="qwen2.5:3b", help="Ollama model to use (default: qwen2.5:3b)")
-    parser.add_argument("--url", default="http://localhost:11434/api/chat", help="Ollama chat API URL (default: http://localhost:11434/api/chat)")
+    parser.add_argument("--model", default=CONFIG["ollama"]["model"], help="Ollama model to use (default: config.toml)")
+    parser.add_argument("--url", default=CONFIG["ollama"]["chat_url"], help="Ollama chat API URL (default: config.toml)")
     parser.add_argument("--persona", default="sensia", help="persona file in persona/personas/")
     parser.add_argument("--web", action="store_true", help="start the web interface instead of the terminal")
     return parser.parse_args()
@@ -141,7 +142,8 @@ def parse_args():
 
 def check_ollama(model, url):
     try:
-        response = requests.post(url, json={"model": model, "messages": []}, timeout=(5, 120))
+        response = requests.post(url, json={"model": model, "messages": [], "options": options()},
+                                 timeout=TIMEOUT)
     except (requests.exceptions.ChunkedEncodingError, requests.exceptions.ConnectionError):
         print("\nServer unreachable")
         return None

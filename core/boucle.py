@@ -1,3 +1,4 @@
+from core.config import CONFIG
 from core.llm import chat
 from core.code_extract import extract_code
 from tools.sandbox import run_python
@@ -16,7 +17,7 @@ def make_ast(code):
         return code
 
 
-def code_cycle(tache, model, url, max_iterations=3):
+def code_cycle(tache, model, url, max_iterations=CONFIG["code"]["max_iterations"]):
     messages = [
         {"role": "system", "content": PROMPT},
         {"role": "user",   "content": tache},
@@ -26,7 +27,7 @@ def code_cycle(tache, model, url, max_iterations=3):
     for tentative in range(1, max_iterations + 1):
         print(f"\n===== Attempt {tentative}/{max_iterations} =====")
 
-        reponse = chat(messages, model, url)
+        reponse = chat(messages, model, url, usage="code")
         if reponse is None:
             print("the model is not responding")
             return {"status": "unavailable", "code": code, "tentatives": tentative}
