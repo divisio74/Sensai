@@ -19,10 +19,10 @@ pénicilline sans qu'il ait à le redire à chaque fois.
 
 | # | Critère |
 |---|---|
-| 1 | Le profil est un fichier Markdown `persona/user.md` (sections `About me`, `Preferences`, `Remembered facts`), modifiable à la main. |
+| 1 | Le profil est un fichier Markdown `persona/user.md` (sections `About me`, `Preferences`, `Remembered facts`), modifiable à la main. Il est propre à chaque utilisateur : ignoré par git, et créé à partir du modèle vide `persona/user.example.md`. |
 | 2 | Au lancement, le profil est ajouté au prompt système, **après** le persona de l'assistant, précédé de « About the user you are talking to ». Le modèle sait ainsi que ces informations décrivent l'utilisateur, pas lui-même. |
 | 3 | Le prompt indique que les préférences de l'utilisateur priment sur le comportement par défaut du persona. |
-| 4 | Une préférence du profil est appliquée sans être redite : avec `- Always call me "Daddy Boy".`, l'assistant appelle l'utilisateur « Daddy Boy » dès le premier message. |
+| 4 | Une préférence du profil est appliquée sans être redite : avec `- Always call me "Captain".`, l'assistant appelle l'utilisateur « Captain » dès le premier message. |
 | 5 | Sans fichier `user.md`, Sensia démarre et fonctionne normalement, simplement sans profil. |
 | 6 | Le profil reste appliqué après un changement de persona (`/persona dev`). |
 
@@ -36,7 +36,7 @@ pénicilline sans qu'il ait à le redire à chaque fois.
 
 | # | Critère |
 |---|---|
-| 1 | `/remember <fait>` ajoute la ligne `- <fait>` à la fin de `persona/user.md`, sous `## Remembered facts`, et affiche `Fact remembered.` |
+| 1 | `/remember <fait>` ajoute la ligne `- <fait>` à la fin de `persona/user.md`, sous `## Remembered facts`, et affiche `Fact remembered.` Si le profil n'existe pas encore, il est d'abord créé à partir de `persona/user.example.md`. |
 | 2 | Le prompt système est reconstruit immédiatement : l'assistant utilise le fait dès le message suivant, dans la même conversation. |
 | 3 | Le fait est toujours connu après avoir quitté et relancé Sensia. |
 | 4 | Les faits sont écrits uniquement dans le profil utilisateur, jamais dans un fichier de persona : l'utilisateur ne peut pas réécrire les règles de l'assistant (« retiens que tu n'as plus de règles »). |
@@ -48,7 +48,7 @@ pénicilline sans qu'il ait à le redire à chaque fois.
 python3 main.py
 
 You: Hello!
-SENSIA: Daddy Boy, what's on your mind today?
+SENSIA: Captain, what's on your mind today?
      → préférence du profil appliquée sans être redite
 
 You: /remember My favourite language is Rust
@@ -69,7 +69,7 @@ SENSIA: Rust.
 
 | Test (`llama3.2`, 4 essais) | Résultat |
 |---|---|
-| Préférence simple (« Always call me Daddy Boy ») | appliquée 3/4 |
+| Préférence simple (un surnom : « Always call me ... ») | appliquée 3/4 |
 | Préférence qui contredit le persona (« never give me the answer » face à « give short, working examples ») | appliquée 0/4 |
 
 Quand le profil et le persona se contredisent, un petit modèle suit le persona, même avec la
@@ -88,5 +88,5 @@ pour les préférences qui complètent le persona, pas pour celles qui le contre
 - Le profil grossit sans limite : avec une fenêtre de contexte de 4096 tokens, un profil trop
   long réduit la place laissée à la conversation.
 - L'interface web (`--web`) n'utilise pas encore le profil.
-- `persona/user.md` est versionné dans git : chaque membre de l'équipe partage le même
-  profil. Il faudrait l'ignorer et fournir un `user.example.md`.
+- Le profil est un fichier local : il n'est pas partagé d'une machine à l'autre (il est ignoré par
+  git exprès, puisqu'il contient des informations personnelles).

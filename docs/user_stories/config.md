@@ -15,7 +15,7 @@ sans chercher les valeurs dans le code.
 
 | # | Critère |
 |---|---|
-| 1 | Tous les réglages sont dans `config.toml`, à la racine, regroupés par fonctionnalité : `[ollama]`, `[generation]`, `[chat]`, `[rag]`, `[code]`, `[web_search]`, `[web]`, `[timepred]`. |
+| 1 | Tous les réglages sont dans `config.toml`, à la racine, regroupés par fonctionnalité : `[ollama]`, `[generation]`, `[chat]`, `[rag]`, `[code]` (dont `[code.docker]` pour les limites du sandbox), `[web_search]`, `[web]`, `[timepred]`. |
 | 2 | Chaque valeur est commentée : son rôle et son unité. |
 | 3 | Les valeurs que le jury avait relevées comme codées en dur viennent de ce fichier : seuil de pertinence RAG, `max_output`, délais d'expiration (Ollama, sandbox, LangSearch, étapes de `/fast`), nombre d'itérations. |
 | 4 | `--model` et `--url` remplacent les valeurs de `[ollama]` pour une session, sans modifier le fichier. |

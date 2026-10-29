@@ -16,7 +16,7 @@ D'où le choix d'un petit modèle (`qwen2.5:3b`) et d'un fonctionnement entière
 | [profile.md](profile.md) | Profil utilisateur et mémoire | 2 |
 | [persona.md](persona.md) | Personas et changement en cours de session | 2 |
 | [rag.md](rag.md) | Réponses à partir de mes documents | 2 |
-| [code.md](code.md) | Code exécuté et corrigé automatiquement | 2 |
+| [code.md](code.md) | Code exécuté, corrigé et isolé dans Docker | 3 |
 | [web_search.md](web_search.md) | Recherche web décidée par le modèle | 2 |
 | [web.md](web.md) | Interface web | 2 |
 | [dev.md](dev.md) | Tâches avec un budget de temps (`/fast`) | 3 |
@@ -34,7 +34,7 @@ Chaque story a des critères d'acceptation vérifiables : un message exact, une 
 | **A5** Persona | Changer de type d'aide sans perdre le contexte | [persona.md](persona.md) 1, 2 | `persona/personas/*.md`, `core/persona.py`, `/persona` | Scénario de démo de la story |
 | **R1** RAG | Interroger ma documentation, qui ne sort pas de ma machine | [rag.md](rag.md) 1, 2 | `rag/ingest.py`, `rag/embed.py`, `rag/store.py`, `rag/retrieve.py` | Scénario de démo de la story |
 | **R2** RAG avancé (score par extrait) | Ne recevoir que des extraits pertinents, avec leurs sources | [rag.md](rag.md) 2 | seuil `threshold`, scores et sources dans `rag/retrieve.py` | Scénario de démo (question hors sujet refusée) |
-| **T2** Exécution sandboxée | Recevoir du code qui tourne, pas seulement du code plausible | [code.md](code.md) 1 | `tools/sandbox.py`, `core/code_extract.py` | README, *Measurements* : `fib(42)` réussi en 3 tentatives |
+| **T2** Exécution sandboxée | Recevoir du code qui tourne, sans mettre ma machine en danger | [code.md](code.md) 1, 3 | `tools/sandbox.py` (conteneur Docker), `core/code_extract.py` | 9 critères d'isolation testés un par un (`/home` vide, clé absente, réseau coupé...) ; `fib(42)` corrigé en 2 tentatives |
 | **A1** Boucle de raisonnement | Que l'agent corrige ses erreurs et ne tourne pas en rond | [code.md](code.md) 1, 2 | `core/boucle.py` (correction, détection de stagnation par AST) | README, *Measurements* : stagnation, 1 exécution au lieu de 3 |
 | **T1** MCP | Que le modèle choisisse lui-même l'outil à appeler | [web_search.md](web_search.md) 1 | `core/mcp_server.py`, `core/mcp_client.py`, `main.py` | Scénario de démo de la story |
 | **T3** Recherche web | Répondre sur l'actualité, avec des sources datées | [web_search.md](web_search.md) 1, 2 | outil `web_search` (LangSearch) | Scénario de démo de la story |

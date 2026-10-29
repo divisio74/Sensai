@@ -50,6 +50,16 @@ threshold = 0.65           # minimum cosine similarity for a chunk to be used
 max_iterations = 3         # attempts of the generate / run / fix loop
 execution_timeout = 10     # seconds before the sandbox kills the code
 max_output = 1500          # characters of stdout / stderr kept
+sandbox = "docker"         # "docker": isolated container | "process": local subprocess, NOT isolated
+fallback_to_process = true # without Docker, run in a local subprocess (with a warning) instead of failing
+
+[code.docker]
+image = "python:3.12-slim" # standard library only: install nothing, fetch nothing
+memory = "256m"            # RAM limit, swap included
+cpus = 1                   # CPU cores
+pids_limit = 64            # processes and threads (stops fork bombs)
+tmp_size = "64m"           # only writable place: /tmp, in memory
+start_margin = 20          # extra seconds allowed for the container to start
 
 [web_search]
 max_results = 3

@@ -1,0 +1,69 @@
+{
+  "machine": {
+    "cpu": "AMD Ryzen 5 5600H with Radeon Graphics",
+    "ram_gb": 15.8,
+    "ollama": "0.34.4"
+  },
+  "results": [
+    {
+      "model": "qwen2.5:1.5b",
+      "family": "qwen2",
+      "parameters": "1.5B",
+      "quantization": "Q4_K_M",
+      "disk_gb": 0.99,
+      "memory_gb": 1.17,
+      "cold_load_s": 4.2,
+      "prompt_tps": 251.5,
+      "gen_tps": 35.8,
+      "median_answer_s": 8.6,
+      "code_success": "4/5",
+      "code_attempts": 1,
+      "code_median_s": 2.8
+    },
+    {
+      "model": "qwen2.5:3b",
+      "family": "qwen2",
+      "parameters": "3.1B",
+      "quantization": "Q4_K_M",
+      "disk_gb": 1.93,
+      "memory_gb": 2.16,
+      "cold_load_s": 4.2,
+      "prompt_tps": 96.9,
+      "gen_tps": 18.2,
+      "median_answer_s": 20.1,
+      "code_success": "4/5",
+      "code_attempts": 1,
+      "code_median_s": 6.7
+    },
+    {
+      "model": "qwen2.5:7b",
+      "family": "qwen2",
+      "parameters": "7.6B",
+      "quantization": "Q4_K_M",
+      "disk_gb": 4.68,
+      "memory_gb": 5.06,
+      "cold_load_s": 11.1,
+      "prompt_tps": 41.4,
+      "gen_tps": 8.4,
+      "median_answer_s": 48.9,
+      "code_success": "5/5",
+      "code_attempts": 1,
+      "code_median_s": 7.7
+    },
+    {
+      "model": "llama3.2:3b",
+      "family": "llama",
+      "parameters": "3.2B",
+      "quantization": "Q4_K_M",
+      "disk_gb": 2.02,
+      "memory_gb": 2.56,
+      "cold_load_s": 5.4,
+      "prompt_tps": 105.6,
+      "gen_tps": 19.0,
+      "median_answer_s": 6.0,
+      "code_success": "5/5",
+      "code_attempts": 1.4,
+      "code_median_s": 5.3
+    }
+  ]
+}

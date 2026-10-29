@@ -11,6 +11,40 @@ No LLM framework is used. Every call to the model is a direct HTTP request to th
 
 ---
 
+## Who it is for
+
+A **developer working locally**, on their own laptop, usually without a GPU (the reference
+machine is a Ryzen 5 5600H with 15 GB of RAM, CPU only). They want an assistant that:
+
+- does not send their code or documents to an online service (everything runs on Ollama,
+  except the web search, which is an explicit and documented exception);
+- runs and checks the code it proposes instead of only writing it;
+- answers questions about their own documentation;
+- adapts to their hardware and habits: the time predictions of `/fast` learn from their own
+  runs, and the profile remembers their preferences.
+
+Typical context: a student or a developer coding in Python, who often repeats the same kinds
+of tasks (small functions, emails, explanations) and works under time constraints.
+
+## Features
+
+| Feature (brief id) | Example | Details |
+|---|---|---|
+| CLI chatbot with streaming and history (B1) | `python3 main.py`, then any question | [Usage](#usage) |
+| Self-correcting code agent, run in a subprocess (T2, A1) | `/code sort [3,1,2] without sorted()` | [The reflection loop](#the-reflection-loop) |
+| RAG over local documents, with sources and a relevance threshold (R1, R2) | `/index`, then `/rag Which files are indexed?` | [RAG](#rag) |
+| Web search chosen by the model, through an MCP server (T1, T3) | `What is new in Python this week?` | [Web search](#web-search-mcp) |
+| Personas, switchable mid-session (A5) | `/persona dev` | [Persona and user profile](#persona-and-user-profile) |
+| Persistent user profile and memory (M1) | `/remember I work in Python` | [Persona and user profile](#persona-and-user-profile) |
+| Tasks under a time budget, with live prediction (T5, A3) | `/fast 30 Write a reminder email for Monday` | [Time-budgeted tasks](#time-budgeted-tasks-fast) |
+| Web interface (X1) | `python3 main.py --web` | [Web interface](#web-interface) |
+| One configuration file, generation parameters per usage | edit `config.toml` | [Configuration](#configuration) |
+
+Every feature has its user stories and acceptance criteria in
+[`docs/user_stories/`](docs/user_stories/README.md).
+
+---
+
 ## Requirements
 
 - Python 3.10+ (developed on 3.12)
@@ -18,6 +52,8 @@ No LLM framework is used. Every call to the model is a direct HTTP request to th
 - A LangSearch API key
 - `requests` and `python-dotenv`
 - `fastapi` and `uvicorn` (only for the web interface)
+- [Docker](https://docs.docker.com/engine/install/), usable without `sudo`, for the isolated code
+  sandbox (without it, Sensia falls back to a local process and says so)
 
 ```bash
 python3 -m venv .venv
@@ -25,6 +61,8 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ollama pull qwen2.5:3b
 ollama pull nomic-embed-text
+docker pull python:3.12-slim
+cp persona/user.example.md persona/user.md   # your own profile, never committed
 ```
 
 Set `LANGSEARCH_API_KEY` in a `.env` file at the project root. The test runner loads this file
@@ -45,8 +83,8 @@ python3 main.py --help
 ## Configuration
 
 Every tunable value lives in [`config.toml`](config.toml), grouped by feature and commented:
-Ollama URLs and timeouts, RAG threshold and chunk size, code-loop iterations and sandbox
-timeout, web-search limits, web server port, `/fast` settings. `--model` and `--url` override
+Ollama URLs and timeouts, RAG threshold and chunk size, code-loop iterations, sandbox mode,
+timeout and Docker limits, web-search limits, web server port, `/fast` settings. `--model` and `--url` override
 the file for one session.
 
 Generation parameters are sent to Ollama as `options`, with one value per usage:
@@ -66,13 +104,23 @@ model between two calls.
 The user stories, their acceptance criteria and the traceability table (feature → need →
 story → code → verification) are in [`docs/user_stories/`](docs/user_stories/README.md).
 
+## Demo
+
+A replayable demo script, one coherent scenario through every feature (about 12 minutes), with
+the exact commands, what to point at and what to do if a step fails:
+[`docs/demo.md`](docs/demo.md).
+
 ## Tests
 
-The LangSearch integration test can be launched independently:
+`tests/main.py` discovers and runs every `tests/test_*.py` file (with the `.env` loaded):
 
 ```bash
 python3 tests/main.py
 ```
+
+The former LangSearch integration test was removed when the web search moved to the MCP server.
+Today, features are verified by the scenarios of the user stories and by the measurements
+below (benchmarks, `/fast` bench).
 
 ## Usage
 
@@ -149,9 +197,8 @@ type checking, at the cost of a toolchain far heavier than this interface needs.
 
 - The answers of `/rag`, `/code` and `/retry` are shown at once, not streamed.
 - Reloading the page while an answer is streaming loses that answer.
-- In the web, the normal chat does not run the automatic internet search: when the model asks
-  for a search, the request is shown as is. `/fast` only works in the
-  terminal for now.
+- In the web, the chat does not pass the MCP tools to the model, so it cannot search the web.
+  `/fast`, `/persona`, `/remember` and the user profile only work in the terminal for now.
 - All browser tabs share the same conversation, which is lost when the server restarts.
 - Command bubbles (`/help`, sources of `/rag`...) are saved by the browser, not by the server.
 
@@ -164,7 +211,8 @@ who the assistant is, and who the user is.
 
 ```
 persona/personas/<name>.md   the assistant: name (first "# " line), tone, role, values
-persona/user.md              the user: about me, preferences, remembered facts
+persona/user.md              the user: about me, preferences, remembered facts (local, not versioned)
+persona/user.example.md      the empty template it is created from
 ```
 
 ```
@@ -198,6 +246,10 @@ reads as-is and a human edits easily, so no parser is needed.
 `/persona` rebuilds it and leaves every other message untouched, so the new persona keeps the
 whole conversation. `/remember` uses the same mechanism to refresh the profile immediately.
 
+**One profile per user, outside git.** `persona/user.md` holds personal information, so it is
+ignored by git: each user copies `persona/user.example.md` or simply runs `/remember`, which
+creates the file from the template. Without it, Sensia runs normally, without a profile.
+
 **Two files: the assistant is read-only, the user profile is writable.** `/remember` only ever
 writes to `persona/user.md`. If facts could be written into the persona file, a user could make
 the assistant "remember" that it has no rules anymore, and that change would be permanent.
@@ -214,7 +266,7 @@ tells the model the facts describe the user, not itself.
 
 | Test (`llama3.2`, 4 runs) | Result |
 |---|---|
-| Profile preference that adds to the persona ("Always call me Daddy Boy") | applied 3/4 |
+| Profile preference that adds to the persona (a nickname: "Always call me ...") | applied 3/4 |
 | Profile preference that contradicts the persona ("never give me the answer" vs "give short, working examples") | applied 0/4 |
 | Fact given before `/persona dev`, asked after | remembered |
 | Fact saved with `/remember`, asked after restarting Sensia | remembered |
@@ -231,21 +283,169 @@ tells the model the facts describe the user, not itself.
   `/persona` / `/remember`.
 - Facts are appended at the end of `user.md`, so `## Remembered facts` must stay the last
   section, and the profile grows without limit in a 4096-token context.
-- `persona/user.md` is versioned, so the whole team shares one profile.
+- The profile is a local file: it is not shared between machines (it is ignored by git on
+  purpose, since it holds personal information).
+
+---
+
+## RAG
+
+```
+/index    knowledge/documents/*.md|txt|py ──► chunks of 500 chars (overlap 100)
+          ──► "search_document: <chunk>" ──► nomic-embed-text ──► knowledge/index/index.json
+
+/rag q    q ──► translated to English ──► "search_query: <q>" ──► nomic-embed-text
+          ──► cosine similarity with every chunk ──► top 3, kept only if ≥ 0.65
+          ──► answer from the extracts only, in the language of q + "Sources: file - line - score"
+```
+
+```
+You: /rag Which files are read by the RAG?
+SENSIA: Only .md, .txt and .py files are read...
+Sources: knowledge/documents/sensia_guide.md - line 27 - score 0.71
+```
+
+### Technical decisions
+
+**Two models, two jobs.** `qwen2.5:3b` generates, `nomic-embed-text` (274 MB, 768 dimensions)
+embeds. An embedding model is trained to place texts with the same meaning close together; a
+generative model is not, and would be slower for this job.
+
+**Asymmetric prefixes.** `nomic-embed-text` was trained with a task prefix: documents are
+embedded as `search_document: ...` and questions as `search_query: ...`. Without them, a short
+question and a long passage land in different regions of the space and scores drop.
+
+**The question is translated to English before the embedding.** `nomic-embed-text` was trained
+mostly on English text, so a French question is matched less well against English documents.
+The generative model translates it first (temperature 0), and the answer prompt asks to reply
+in the language of the original question, so the user never sees the translation.
+
+**A threshold rather than "always the top 3".** Below 0.65, the chunks are not about the
+question: injecting them anyway pushes the model to answer from irrelevant text. With no chunk
+above the threshold, Sensia says so and does not generate an answer.
+
+**The similarity is a cosine.** `nomic-embed-text` returns unit vectors (measured length:
+1.0000), so their dot product *is* the cosine similarity, in [-1, 1], which is the scale the
+0.65 threshold refers to.
+
+**A JSON file, not a vector database.** The corpus is a few local documents: scoring every
+chunk takes milliseconds, and a JSON file needs no extra service to install.
+
+**The answer prompt only allows the extracts** and asks to say "I don't know" otherwise, with
+a low temperature (0.1): the goal is to quote the documentation, not to improvise.
+
+### Limitations
+
+- No reranking and no metadata filtering (date, author).
+- `/index` recomputes the whole index; the translation adds one model call per question.
+
+---
+
+## Web search (MCP)
+
+The web search is a tool exposed by an MCP server (`core/mcp_server.py`, `web_search`, backed
+by LangSearch). At start-up, `main.py` launches the server, lists its tools and passes them to
+Ollama in the `tools` field. **The model decides by itself** to call the tool, with a native
+tool call; Sensia runs it, returns the result as a `tool` message, and the model continues.
+
+```
+You: What is new in Python this week?
+[Tool web_search: {'query': 'Python news', 'freshness': 'oneWeek'}]
+SENSIA: This week, ... (dates) ... Sources: ...
+```
+
+### Technical decisions
+
+**Native tool calls instead of a parsed JSON answer.** The first version asked the model to
+answer with a JSON list of queries, and any answer that parsed as a JSON list triggered a
+search, even when it was not meant to. A structured tool call removes that ambiguity.
+
+**MCP rather than a Python function.** The tool follows a standard protocol: the same server
+works with any MCP client, and Sensia can use other MCP servers without new code.
+
+**Results are kept short and dated**: 3 results, each with its title, URL, publication date and
+a summary of at most 2,000 characters, so they fit in a 4,096-token context. The persona asks
+for a summary with dates, then the sources, never a bare list of links.
+
+### Limitations
+
+- **Privacy**: the query leaves the machine and goes to LangSearch, unlike the rest of Sensia.
+  This is the only external call; it needs a key in `.env` and can be avoided by not asking
+  for recent information.
+- Each tool call starts the MCP server process again (about 1 s).
+- Not available in the web interface yet.
+
+---
+
+## Time-budgeted tasks (`/fast`)
+
+`/fast <seconds> <task>` runs a task within a time budget, predicts how long it will take
+before and while it runs, and adapts to keep the budget.
+
+```
+You: /fast 8 Explain how HTTP caching works and compare it with a CDN for a beginner audience
+Initial prediction (history only): 13s ± 6s = 1s of setup (...) + 12s of work
+  ✂ answer shortened to ~65 words to fit the budget (~6s instead of ~12s)
+  ⏳  47 tokens | p= 54% | -> 8±1s total
+Budget: 8s -> kept
+```
+
+- **The plan**: the model only classifies the deliverable (`text`, `code`, `explanation`) with a
+  JSON schema; the plan itself is built in Python (`write`, `code` [+ `explain`], `explain`,
+  preceded by `research` when asked). Letting a 3B model plan freely produced five steps for an
+  email and impossible actions ("send the email"); on 5 real tasks, the built plans took
+  69 s instead of 243 s and delivered the expected result 5 times out of 5 instead of 3.
+- **The prediction**: a Bayesian fusion of two estimates. The history estimate uses the speed
+  of the machine (tokens/s) and the usual length of the answer, both learned from past runs;
+  the live estimate extrapolates the elapsed time from the progress, measured in tokens while
+  the model writes.
+- **The budget**: checked before starting (`Continue anyway? [y/N]`), kept by asking for a
+  shorter answer when the usual one does not fit, and checked again during generation, where
+  the user can stop the task and keep what is done.
+- **Code steps** go through `code_cycle`: the code is run and verified.
+
+Measured (CPU only): budget kept in 20 of 24 runs, and the 4 overruns were all announced
+before they happened; prediction error 37 % for a new task, 24 % for a task already run twice,
+9 % when 90 % of the answer is written. Details: [`docs/user_stories/dev.md`](docs/user_stories/dev.md).
+
+---
+
+## Model choice and local benchmark
+
+`qwen2.5:3b` (Q4_K_M) is the default because, on the reference laptop (CPU only), it is the
+largest model that stays interactive:
+
+| Model | Memory | Generation | Median answer | Code loop |
+|---|---|---|---|---|
+| qwen2.5:1.5b | 1.2 GB | 35.8 tokens/s | 8.6 s | 4/5 |
+| **qwen2.5:3b** | **2.2 GB** | **18.2 tokens/s** | **20.1 s** | **4/5** |
+| qwen2.5:7b | 5.1 GB | 8.4 tokens/s | 48.9 s | 5/5 |
+| llama3.2:3b (other family) | 2.6 GB | 19.0 tokens/s | 6.0 s | 5/5 |
+
+The 7B is a bit more reliable, but more than twice as slow: a typical answer takes almost a
+minute, which breaks both the conversation and the `/fast` budgets. At the same size, Llama 3.2
+runs at the same speed but writes answers three times shorter. The full analysis (speed
+versus size, quantization, other model families) and every measurement of the harness are in
+[`benchmarks/README.md`](benchmarks/README.md).
 
 ---
 
 ## Architecture
 
 ```
-main.py                  CLI, chat history, command dispatch
+main.py                  CLI, chat history, command dispatch, tool-call loop
 │
+├── core/config.py       reads config.toml, builds the Ollama options of each usage
 ├── core/commands.py     commands shared by the CLI and the web (/help, /undo, /rag, /code...)
-├── core/llm.py          HTTP transport to Ollama, NDJSON streaming (stream_chat, chat)
+├── core/llm.py          HTTP transport to Ollama, NDJSON streaming, tools (stream_chat, chat)
 ├── core/persona.py      persona and user profile -> system prompt
 ├── core/boucle.py       the reflection loop  (code_cycle)
 ├── core/code_extract.py pulls Python out of the model's markdown answer
+├── core/mcp_client.py   starts the MCP server, lists and calls its tools
+├── core/mcp_server.py   MCP server exposing web_search (LangSearch)
 ├── tools/sandbox.py     runs code in a subprocess  (run_python)
+├── rag/                 ingest -> embed -> store -> retrieve
+├── timepred/            /fast: plan, prediction, live budget, learning
 └── web.py               web server (--web), uses the same commands and stream_chat()
 ```
 
@@ -276,8 +476,32 @@ kind of object — it is just another message in the conversation. That is the w
 Generated code is neither malicious nor trustworthy. With `exec()`, an infinite loop freezes the
 agent permanently — Python has no way to interrupt a running statement. A child process can be
 killed by the OS, which gives us a timeout, protects our own variables from being overwritten,
-and separates stdout/stderr for free. It is also the only form that *could* later be given
-resource limits or filesystem isolation.
+and separates stdout/stderr for free.
+
+### A Docker container per execution
+
+A child process still runs with the user's rights: it can read their files, open a network
+connection, and read the environment variables, including the LangSearch key that `main.py`
+loads from `.env`. Each generated program therefore runs in a throw-away container
+(`tools/sandbox.py`, settings in `[code.docker]` of `config.toml`):
+
+| Protection | How |
+|---|---|
+| No access to the user's files | only the image's file system, read-only (`--read-only`); the only writable place is a 64 MB `/tmp` in memory |
+| No network | `--network none` |
+| No secret | the container does not inherit Sensia's environment: no `LANGSEARCH_API_KEY` |
+| No privileges | user `nobody` (`--user 65534`), `--cap-drop ALL`, `--security-opt no-new-privileges` |
+| Bounded resources | 256 MB of RAM swap included, 1 CPU, 64 processes |
+| Bounded time | `timeout` inside the container, and the container is killed if it does not stop |
+| Nothing left behind | `--rm`: the container is deleted after each run |
+
+The cost is small: **0.2 to 0.5 s** per execution. The trade-off is that the image only has the
+standard library: code that imports `numpy` fails, and the loop then tries without it.
+
+Without Docker (for instance on a teammate's machine), the code falls back to a local process,
+with a warning. That process is hardened too (empty temporary directory, cleaned environment
+without the key, Python in isolated mode `-I`), but it is not isolated from the machine.
+`fallback_to_process = false` refuses to run code without Docker.
 
 ### Execution-grounded reflection, not self-critique
 
@@ -360,6 +584,11 @@ than on a belief about training data.
 |---|---|
 | Self-correction, naive `fib(42)` | success in 3 attempts, 36.8 s (2 timeouts, then memoisation) |
 | Stagnation detection (fake `chat`, always same code) | `run_python` called **1×** instead of 3× |
+| Docker sandbox: `os.listdir('/home')` | `[]` (the jury's example, which used to list the real folders) |
+| Docker sandbox: `LANGSEARCH_API_KEY` visible | `False` |
+| Docker sandbox: network, write outside `/tmp` | `Network is unreachable`, `Read-only file system` |
+| Docker sandbox: infinite loop, 400 MB allocation, process bomb | stopped at the timeout, killed at 256 MB, blocked after 62 processes |
+| Docker sandbox: cost of a run | 0.2 to 0.5 s; naive `fib(42)` still corrected in 2 attempts (18 s) |
 | Format compliance, FR vs EN system prompt | 6/6 vs 6/6 |
 | Effective context window | 4096 tokens (`ollama ps`), model capacity 32768 |
 
@@ -380,12 +609,12 @@ answer. Verifying correctness requires a reference *external* to the system that
 code (user-provided tests, invariants, a second implementation). Sensia does not have one, so
 `success` should be read as *"ran without error"*, not *"is correct"*.
 
-**The sandbox isolates the process, not the system.** `subprocess` protects the agent from
-crashes, infinite loops and variable collisions. It does **not** prevent generated code from
-writing to the filesystem or opening a network connection — it runs with the user's own rights.
-The threat model covered here is *accidentally destructive LLM output*, not a determined
-attacker. Filesystem isolation (temporary working directory), a cleaned environment and
-`resource.setrlimit` caps are the natural next step.
+**The sandbox depends on Docker.** With Docker, generated code cannot see the user's files,
+the network or the API key (see [A Docker container per execution](#a-docker-container-per-execution)).
+A container shares the host's kernel: it protects against *accidentally destructive or
+indiscreet LLM output*, not against a determined attacker exploiting a kernel flaw, which would
+need a virtual machine. Without Docker, the fallback process is hardened but runs with the
+user's rights. The image only contains the Python standard library.
 
 **Contradictory tasks.** A task can be impossible as stated (e.g. "compute fib(42) with naive
 recursion" cannot finish within the execution budget). The model then oscillates between the
@@ -394,18 +623,28 @@ the request is impossible, but this is mitigation, not a solution.
 
 **Small-model fragility.** `qwen2.5:3b` was chosen for fast iteration on CPU. It is weaker at
 instruction-following and role tracking than a 7B. The model is selectable at runtime
-(`--model`) precisely so this can be traded off without touching the code.
+(`--model`) precisely so this can be traded off without touching the code. See
+[Model choice](#model-choice-and-local-benchmark) for the measured trade-off.
+
+**One external call.** Everything runs locally except the web search: the query is sent to
+LangSearch. It is the price of answering about recent events, and the only data that leaves
+the machine.
+
+**The context is not budgeted.** The history grows without limit and tokens are not counted:
+a long session eventually exceeds the 4,096-token context, and Ollama then silently drops the
+oldest part of the prompt.
 
 ---
 
 ## Not implemented
 
-- Configuration file (the spec allows *CLI argument **or*** config file; only CLI is implemented)
-- Structured output / JSON schema-constrained decoding
-- Native tool calling
 - Persistence of the conversation history across sessions (the user profile and remembered
   facts do persist)
 - Context compaction for long conversations (the chat history grows unbounded)
+
+Implemented since the mid-term review: the configuration file (`config.toml`), structured
+output (JSON schema for the `/fast` plan), native tool calling through MCP, persona switching
+mid-session, the isolated Docker sandbox.
 
 ---
 
@@ -418,7 +657,9 @@ web/
     index.html           chat page
     css/style.css        design
     js/app.js            sends the text, reads the stream, redraws the conversation
+config.toml              every tunable value: Ollama, generation options, RAG, code, web...
 core/
+    config.py            CONFIG, options(usage), TIMEOUT
     commands.py          handle_command(text, messages, model, url) -> str | None
     llm.py               stream_chat(messages, model, url) -> yields str
                          chat(messages, model, url) -> str | None
@@ -426,11 +667,21 @@ core/
     code_extract.py      extract_code(text) -> str
     persona.py           load_persona(id), list_personas(), get_persona_name(id),
                          load_user_profile(), remember(fact), build_system_prompt(...)
+    mcp_client.py        get_tools(), call_tool(name, arguments)
+    mcp_server.py        MCP server: web_search(query, freshness)
+rag/
+    ingest.py            reads knowledge/documents/, chunk_text()
+    embed.py             embed(texts), similarity(a, b)
+    store.py             save_index(), load_index()
+    retrieve.py          translate(), retrieve(question), build_prompt()
+timepred/                /fast: runner, plan, history, fusion, budget, worker, executor
+benchmarks/
+    models.py            speed, memory and code-loop success of several models
 persona/
     personas/*.md        one file per assistant persona (sensia, dev)
-    user.md              the user profile, completed by /remember
-docs/user_stories/       user stories (dev, persona, profile)
+    user.example.md      empty profile template (versioned)
+    user.md              your own profile, completed by /remember (git-ignored)
+docs/user_stories/       user stories of every feature + traceability table
 tools/
-    sandbox.py           run_python(code, timeo=10) -> dict
-info.md                  team task split
+    sandbox.py           run_python(code, timeo) -> dict: Docker container, or hardened process
 ```
