@@ -100,6 +100,12 @@ model between two calls.
 The user stories, their acceptance criteria and the traceability table (feature → need →
 story → code → verification) are in [`docs/user_stories/`](docs/user_stories/README.md).
 
+## Demo
+
+A replayable demo script, one coherent scenario through every feature (about 12 minutes), with
+the exact commands, what to point at and what to do if a step fails:
+[`docs/demo.md`](docs/demo.md).
+
 ## Tests
 
 `tests/main.py` discovers and runs every `tests/test_*.py` file (with the `.env` loaded):
