@@ -23,15 +23,15 @@ def get_persona_name(persona_id):
             return name
     return "Assistant"
 
-def load_user_profile():
-    if not USER_FILE.exists():
+def load_user_profile(profile_file=USER_FILE):
+    if not profile_file.exists():
         return ""
-    return USER_FILE.read_text(encoding="utf-8")
+    return profile_file.read_text(encoding="utf-8")
 
-def remember(fact):
-    if not USER_FILE.exists() and USER_TEMPLATE.exists():
-        USER_FILE.write_text(USER_TEMPLATE.read_text(encoding="utf-8"), encoding="utf-8")
-    with open(USER_FILE, "a", encoding="utf-8") as f:
+def remember(fact, profile_file=USER_FILE):
+    if not profile_file.exists() and USER_TEMPLATE.exists():
+        profile_file.write_text(USER_TEMPLATE.read_text(encoding="utf-8"), encoding="utf-8")
+    with open(profile_file, "a", encoding="utf-8") as f:
         f.write(f"- {fact.strip()}\n")
 
 def build_system_prompt(persona_text, user_profile=""):

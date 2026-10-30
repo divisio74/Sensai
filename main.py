@@ -11,7 +11,7 @@ from timepred.runner import run as run_timed
 from core.commands import handle_command
 from web import run
 from getpass import getpass
-from core.auth import login, register, user_exists
+from core.auth import login, register, user_exists, profile_path
 
 
 
@@ -131,6 +131,34 @@ def u_send_message_a(content, messages, model, url, persona):
             continue
         break
 
+def ask_persona():
+    while True:
+        persona = input(f"Persona ({', '.join(list_personas())}): ").strip()
+        if persona in list_personas():
+            return persona
+        print("Unknown persona")
+
+def ask_login():
+    email = input("Email: ").strip()
+    if not email:
+        return None
+    if user_exists(email):
+        user = login(email, getpass("Password: "))
+        if user is None:
+            print("Wrong password.")
+        return user
+    if input("No account for this email. Create one? [y/n] ").strip().lower() != "y":
+        return None
+    password = getpass("Choose a password: ")
+    persona = ask_persona()
+    about = input("Tell Sensia about you (your job, languages, how it should answer):\n> ")
+    error = register(email, password, persona, about)
+    if error:
+        print(error)
+        return None
+    print("Account created.")
+    return {"email": email, "persona": persona}
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Sensia: Local assistant")
     parser.add_argument("--model", default=CONFIG["ollama"]["model"], help="Ollama model to use (default: config.toml)")
@@ -181,7 +209,16 @@ def main():
         TOOLS.extend(get_tools())
     except Exception as e:
         print(f"MCP server unavailable, continuing without tools: {e}")
-    system_message = build_system_prompt(persona_text, load_user_profile())
+    try:
+        user = ask_login()
+    except (EOFError, KeyboardInterrupt):
+        print("\nGoodbye")
+        return
+    if user is None:
+        return
+    persona = user["persona"]
+    profile_file = profile_path(user["email"])
+    system_message = build_system_prompt(load_persona(persona), load_user_profile(profile_file))
     messages = [system_message]
 
     while True:
@@ -202,8 +239,8 @@ def main():
             if not fact.strip():
                 print("Usage: /remember <fact>")
                 continue
-            remember(fact)
-            messages[0] = build_system_prompt(load_persona(persona), load_user_profile())
+            remember(fact, profile_file)
+            messages[0] = build_system_prompt(load_persona(persona), load_user_profile(profile_file))
             print("Fact remembered.")
             continue
 
@@ -213,7 +250,7 @@ def main():
                 print(f"Current persona: {persona}. Available: {', '.join(list_personas())}")
                 continue
             persona = new_persona
-            messages[0] = build_system_prompt(load_persona(persona), load_user_profile())
+            messages[0] = build_system_prompt(load_persona(persona), load_user_profile(profile_file))
             print(f"Switched to {get_persona_name(persona)} (conversation kept)")
             continue
 
