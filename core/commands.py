@@ -6,8 +6,10 @@ from rag.embed import embed_chunks
 from rag.store import save_index
 from rag.retrieve import retrieve, build_prompt
 from core.boucle import code_cycle
+from core.persona import load_persona, build_system_prompt, list_personas, get_persona_name, load_user_profile, remember
+from core.auth import profile_path
 
-KNOWN_COMMANDS = ["/help", "/clear", "/undo", "/retry", "/code", "/index", "/rag", "/fast"]
+KNOWN_COMMANDS = ["/help", "/clear", "/undo", "/retry", "/code", "/index", "/rag", "/fast", "/persona", "/remember"]
 
 HELP_TEXT = """Commands:
   /help                     show this list
@@ -110,7 +112,25 @@ def code(task, messages, model, url):
     messages.append({"role": "assistant", "content": reply})
     return ""
 
-def handle_command(user_input, messages, model, url):
+def refresh_prompt(messages, user):
+    profile = load_user_profile(profile_path(user["email"]))
+    messages[0] = build_system_prompt(load_persona(user["persona"]), profile)
+
+def switch_persona(name, messages, user):
+    if name not in list_personas():
+        return f"Current persona: {user['persona']}. Available: {', '.join(list_personas())}"
+    user["persona"] = name
+    refresh_prompt(messages, user)
+    return f"Switched to {get_persona_name(name)} (conversation kept)"
+
+def remember_fact(fact, messages, user):
+    if not fact:
+        return "Usage: /remember <fact>"
+    remember(fact, profile_path(user["email"]))
+    refresh_prompt(messages, user)
+    return "Fact remembered."
+
+def handle_command(user_input, messages, model, url, user):
     command = user_input.strip()
     if command == "/help":
         return HELP_TEXT
@@ -126,6 +146,10 @@ def handle_command(user_input, messages, model, url):
         return rag(command[len("/rag"):].strip(), messages, model, url)
     if command.startswith("/code"):
         return code(command[len("/code"):].strip(), messages, model, url)
+    if command == "/persona" or command.startswith("/persona "):
+        return switch_persona(command[len("/persona"):].strip(), messages, user)
+    if command == "/remember" or command.startswith("/remember "):
+        return remember_fact(command[len("/remember"):].strip(), messages, user)
     if command.startswith("/") and command.split()[0] not in KNOWN_COMMANDS:
         return "Unknown command, type /help"
     return None

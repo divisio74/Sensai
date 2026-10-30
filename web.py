@@ -107,7 +107,7 @@ def stream_answer(text):
 @app.post("/api/chat")
 def api_chat(request: ChatRequest):
     check_logged_in()
-    output = handle_command(request.text, messages, MODEL, OLLAMA_URL)
+    output = handle_command(request.text, messages, MODEL, OLLAMA_URL, CURRENT_USER)
     if output is not None:
         return {"output": output, "messages": messages[1:]}
     return StreamingResponse(stream_answer(request.text), media_type="text/plain")

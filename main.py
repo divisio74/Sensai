@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from core.config import CONFIG, TIMEOUT, options
 from core.llm import chat_with_tools
 from core.mcp_client import get_tools, call_tool
-from core.persona import load_persona, build_system_prompt, get_persona_name, load_user_profile, remember, list_personas
+from core.persona import load_persona, build_system_prompt, get_persona_name, load_user_profile, list_personas
 from timepred.runner import run as run_timed
 from core.commands import handle_command
 from web import run
@@ -234,28 +234,8 @@ def main():
         if user_input == "quit":
             break
 
-        if user_input.startswith("/remember "):
-            fact = user_input[len("/remember "):]
-            if not fact.strip():
-                print("Usage: /remember <fact>")
-                continue
-            remember(fact, profile_file)
-            messages[0] = build_system_prompt(load_persona(persona), load_user_profile(profile_file))
-            print("Fact remembered.")
-            continue
-
-        if user_input == "/persona" or user_input.startswith("/persona "):
-            new_persona = user_input[len("/persona"):].strip()
-            if new_persona not in list_personas():
-                print(f"Current persona: {persona}. Available: {', '.join(list_personas())}")
-                continue
-            persona = new_persona
-            messages[0] = build_system_prompt(load_persona(persona), load_user_profile(profile_file))
-            print(f"Switched to {get_persona_name(persona)} (conversation kept)")
-            continue
-
-
-        output = handle_command(user_input, messages, model, url)
+        output = handle_command(user_input, messages, model, url, user)
+        persona = user["persona"]
         if output is not None:
             if output:
                 print(output)
