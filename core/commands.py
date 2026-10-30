@@ -18,6 +18,8 @@ HELP_TEXT = """Commands:
   /index                    index the documents in knowledge/
   /rag <question>           answer from the documents
   /fast <seconds> <task>    run a task within a time budget
+  /persona <name>           switch persona, the conversation is kept
+  /remember <fact>          save a fact in your profile
   quit                      exit Sensia"""
 
 def clear(messages):
@@ -76,12 +78,22 @@ def rag(question, messages, model, url):
         sources += f"\nSources: {chunk['source']} - line {chunk['line']} - score {chunk['score']:.2f}"
     return sources
 
+def format_attempts(attempts):
+    text = ""
+    for number, attempt in enumerate(attempts, 1):
+        text += f"Attempt {number}:\n```python\n{attempt['code']}\n```\n"
+        if attempt["error"]:
+            text += f"Error:\n```\n{attempt['error'][-500:]}\n```\n"
+    return text
+
 def code(task, messages, model, url):
     if not task:
         return "Usage: /code <task>"
     result = code_cycle(task, model, url)
     if result["status"] == "success":
-        content = ("Here is the code you need :" + result["code"] + "and the result of his execution :" + result["stdout"])
+                content = ("Here is the code that was run:\n```python\n" + result["code"] + "\n```\n"
+                   + "Its output:\n" + (result["stdout"] or "(nothing printed)") + "\n"
+                   + "Explain this code to the user in a few sentences.")
     else:
         content = "Unfortunetely its impossible to do this actually ask me to remake my goals !"
     messages.append({"role": "user", "content": content, "display": "/code " + task})
@@ -90,8 +102,11 @@ def code(task, messages, model, url):
     if reply is None:
         messages.pop()
         return "Sensia could not answer (is Ollama running?)"
+    attempts = format_attempts(result["attempts"])
     if result["status"] == "success":
-        reply = "```python\n" + result["code"] + "\n```\nOutput:\n```\n" + result["stdout"] + "```\n" + reply
+        reply = attempts + "Output:\n```\n" + result["stdout"] + "```\n" + reply
+    else:
+        reply = attempts + reply
     messages.append({"role": "assistant", "content": reply})
     return ""
 
