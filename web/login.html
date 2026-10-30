@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sensai</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="empty">
+    <header id="topbar">
+        <div id="logo">SENSAI</div>
+    </header>
+
+    <section id="welcome">
+        <h2 id="greeting">Welcome to Sensai</h2>
+        <p id="subtitle">Log in or fill everything to create an account</p>
+
+        <form id="login-form">
+            <input id="email" placeholder="Email" required>
+            <input id="password" type="password" placeholder="Password" required>
+            <select id="persona"></select>
+            <textarea id="about" placeholder="Tell Sensai about you (only to create an account)"></textarea>
+            <p id="error"></p>
+            <button id="login" type="submit">Log in</button>
+            <button id="register" class="ghost" type="button">Create account</button>
+        </form>
+    </section>
+
+    <script src="/js/login.js"></script>
+</body>
+</html>

@@ -3,6 +3,7 @@ const form = document.getElementById("form");
 const input = document.getElementById("input");
 const send = document.getElementById("send");
 const newChat = document.getElementById("new-chat");
+const logout = document.getElementById("logout");
 
 function scrollDown()
 {
@@ -116,6 +117,10 @@ async function sendText(text, onPiece)
             body: JSON.stringify({ text: text }),
         });
 
+        if (response.status === 401) {
+            window.location.href = "/";
+            return { output: "Not logged in.", messages: null };
+        }
         if (response.headers.get("content-type").includes("application/json"))
             return await response.json();
 
@@ -183,6 +188,12 @@ newChat.addEventListener("click", async () => {
     saveNotes();
     showConversation(data.messages || []);
     input.focus();
+});
+
+logout.addEventListener("click", async () => {
+    await fetch("/api/logout", { method: "POST" }).catch(() => {});
+    localStorage.removeItem("notes");
+    window.location.href = "/";
 });
 
 fetch("/api/history")
