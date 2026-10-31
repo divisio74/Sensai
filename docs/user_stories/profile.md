@@ -19,11 +19,11 @@ pénicilline sans qu'il ait à le redire à chaque fois.
 
 | # | Critère |
 |---|---|
-| 1 | Le profil est un fichier Markdown `persona/user.md` (sections `About me`, `Preferences`, `Remembered facts`), modifiable à la main. Il est propre à chaque utilisateur : ignoré par git, et créé à partir du modèle vide `persona/user.example.md`. |
+| 1 | Le profil est un fichier Markdown `data/profiles/<email>.md` (sections `About me`, `Preferences`, `Remembered facts`), modifiable à la main. Il est propre à chaque compte : créé à l'inscription, avec la présentation donnée par l'utilisateur, et ignoré par git. |
 | 2 | Au lancement, le profil est ajouté au prompt système, **après** le persona de l'assistant, précédé de « About the user you are talking to ». Le modèle sait ainsi que ces informations décrivent l'utilisateur, pas lui-même. |
 | 3 | Le prompt indique que les préférences de l'utilisateur priment sur le comportement par défaut du persona. |
 | 4 | Une préférence du profil est appliquée sans être redite : avec `- Always call me "Captain".`, l'assistant appelle l'utilisateur « Captain » dès le premier message. |
-| 5 | Sans fichier `user.md`, Sensia démarre et fonctionne normalement, simplement sans profil. |
+| 5 | Si le fichier de profil est supprimé, Sensia démarre et fonctionne normalement, simplement sans profil. |
 | 6 | Le profil reste appliqué après un changement de persona (`/persona dev`). |
 
 ## User story 2 — Faire retenir une information
@@ -36,16 +36,18 @@ pénicilline sans qu'il ait à le redire à chaque fois.
 
 | # | Critère |
 |---|---|
-| 1 | `/remember <fait>` ajoute la ligne `- <fait>` à la fin de `persona/user.md`, sous `## Remembered facts`, et affiche `Fact remembered.` Si le profil n'existe pas encore, il est d'abord créé à partir de `persona/user.example.md`. |
+| 1 | `/remember <fait>` ajoute la ligne `- <fait>` à la fin de `data/profiles/<email>.md`, sous `## Remembered facts`, et affiche `Fact remembered.` Si le profil a été supprimé, il est d'abord recréé à partir de `persona/user.example.md`. |
 | 2 | Le prompt système est reconstruit immédiatement : l'assistant utilise le fait dès le message suivant, dans la même conversation. |
 | 3 | Le fait est toujours connu après avoir quitté et relancé Sensia. |
 | 4 | Les faits sont écrits uniquement dans le profil utilisateur, jamais dans un fichier de persona : l'utilisateur ne peut pas réécrire les règles de l'assistant (« retiens que tu n'as plus de règles »). |
-| 5 | `/remember` suivi de seulement des espaces affiche `Usage: /remember <fact>` et n'écrit rien. |
+| 5 | `/remember` seul, ou suivi de seulement des espaces, affiche `Usage: /remember <fact>` et n'écrit rien. |
 
 ## Scénario de démo
 
 ```
 python3 main.py
+Email: ...
+Password:
 
 You: Hello!
 SENSIA: Captain, what's on your mind today?
@@ -60,6 +62,8 @@ SENSIA: Your favourite language is Rust.
 
 You: quit
 python3 main.py
+Email: ...
+Password:
 You: What is my favourite language?
 SENSIA: Rust.
      → fait toujours connu après redémarrage

@@ -30,7 +30,7 @@ Chaque story a des critères d'acceptation vérifiables : un message exact, une 
 | Fonctionnalité du sujet | Besoin de l'utilisateur | Stories | Implémentation | Vérification |
 |---|---|---|---|---|
 | **B1** Chatbot CLI | Discuter avec un modèle local, en direct, sans quitter le terminal | [chat.md](chat.md) 1, 2 | `main.py`, `core/llm.py`, `core/commands.py` | Scénario de démo de la story |
-| **M1** Profil persistant | Ne pas répéter qui je suis à chaque session | [profile.md](profile.md) 1, 2 | `persona/user.md`, `core/persona.py`, `/remember` | Scénario de démo de la story. *L'historique des conversations n'est pas encore sauvegardé entre sessions.* |
+| **M1** Profil persistant | Ne pas répéter qui je suis à chaque session | [profile.md](profile.md) 1, 2 | `data/profiles/<email>.md`, `core/auth.py`, `core/persona.py`, `/remember` | Scénario de démo de la story. *L'historique des conversations n'est pas encore sauvegardé entre sessions.* |
 | **A5** Persona | Changer de type d'aide sans perdre le contexte | [persona.md](persona.md) 1, 2 | `persona/personas/*.md`, `core/persona.py`, `/persona` | Scénario de démo de la story |
 | **R1** RAG | Interroger ma documentation, qui ne sort pas de ma machine | [rag.md](rag.md) 1, 2 | `rag/ingest.py`, `rag/embed.py`, `rag/store.py`, `rag/retrieve.py` | Scénario de démo de la story |
 | **R2** RAG avancé (score par extrait) | Ne recevoir que des extraits pertinents, avec leurs sources | [rag.md](rag.md) 2 | seuil `threshold`, scores et sources dans `rag/retrieve.py` | Scénario de démo (question hors sujet refusée) |

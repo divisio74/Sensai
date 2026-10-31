@@ -16,8 +16,8 @@ au jury.
 - [ ] `ollama list` affiche `qwen2.5:3b` et `nomic-embed-text`.
 - [ ] `docker pull python:3.12-slim` est fait, et `docker ps` répond sans `sudo`.
 - [ ] `.env` contient `LANGSEARCH_API_KEY=...` (pour l'acte 4).
-- [ ] `persona/user.md` existe et contient **ton** profil (sinon : `cp persona/user.example.md persona/user.md`), par exemple `- My name is Pierre.` sous `## About me`. Ce fichier est local et ignoré par git.
-- [ ] `python3 main.py` démarre sans erreur, puis `quit`.
+- [ ] **Créer le compte de démo** : `python3 main.py`, saisir un e-mail, répondre `y` à `No account for this email. Create one?`, choisir un mot de passe (il ne s'affiche pas), le persona `sensia`, puis se présenter, par exemple `My name is Pierre.`. Le compte et le profil sont dans `data/`, local et ignoré par git.
+- [ ] `python3 main.py` démarre sans erreur et accepte ce compte, puis `quit`.
 - [ ] **Faire chauffer le modèle** : lancer une fois `/fast 30 Écris un mail de relance pour lundi`. Sinon, le premier appel coûte environ 10 s de chargement.
 - [ ] Ne pas vider `knowledge/history/` : c'est lui qui rend les prédictions de `/fast` précises.
 - [ ] Fermer les applications lourdes : sur CPU, la vitesse dépend de la mémoire disponible.
@@ -30,7 +30,7 @@ au jury.
 
 | Je tape | On doit voir | Ce que ça montre |
 |---|---|---|
-| `python3 main.py` | `You:` | Démarrage, vérification d'Ollama |
+| `python3 main.py`, puis l'e-mail et le mot de passe du compte de démo | `Email:`, `Password:`, puis `You:` | Démarrage, vérification d'Ollama, connexion |
 | `Bonjour, qui es-tu ?` | `SENSIA: ...` qui s'écrit mot à mot, et qui t'appelle par ton prénom | Streaming, persona, profil injecté dès le premier message |
 | `/remember Je code surtout en Python` | `Fact remembered.` | Mémoire persistante |
 | `Quel langage j'utilise ?` | `... Python ...` | Le fait est utilisé tout de suite |
@@ -68,6 +68,8 @@ au jury.
 
 > **À dire** : « Seul le prompt système change ; tout le reste de la conversation est gardé.
 > Un nouveau persona, c'est un nouveau fichier Markdown, sans une ligne de Python. »
+
+Ce changement ne dure que la session : à la connexion suivante, Sensia reprend le persona du compte.
 
 ---
 
@@ -132,6 +134,9 @@ arrive dès le départ, répondre `y` pour atteindre celle du milieu.
 |---|---|---|
 | `Écris-moi une fonction Python qui inverse une chaîne, en moins de 40 secondes` | `[Sensia wants to run: /fast 40 ...]` puis `Run it? [y/N]` → `y` | Le modèle déclenche l'outil, mais rien ne s'exécute sans confirmation |
 
+Cet acte demande le persona `dev`, actif depuis l'acte 3 : seul ce persona décrit cet outil au
+modèle. S'il est joué seul, taper d'abord `/persona dev`.
+
 ---
 
 ## Acte 8 (optionnel) — L'interface web (X1)
@@ -139,9 +144,11 @@ arrive dès le départ, répondre `y` pour atteindre celle du milieu.
 | Je tape | On doit voir | Ce que ça montre |
 |---|---|---|
 | `quit`, puis `python3 main.py --web` | le serveur sur `http://127.0.0.1:4040` | Interface découplée, même backend |
+| ouvrir l'adresse, puis se connecter avec le compte de démo | la page de connexion, puis la page de discussion | Le même compte et le même profil que dans le terminal |
 | une question, puis `/code Write a Python function that returns the first 15 Fibonacci numbers and print them` | la réponse en streaming, puis le code et sa sortie dans la page | Les mêmes commandes que le terminal |
 
-`/fast`, `/persona`, `/remember` et la recherche web ne sont pas encore disponibles dans le web.
+`/persona` et `/remember` fonctionnent aussi dans le web. `/fast` et la recherche web ne sont pas
+disponibles : un `/fast` y part vers le modèle comme un message ordinaire, donc ne pas le taper ici.
 
 ---
 
@@ -160,22 +167,23 @@ arrive dès le départ, répondre `y` pour atteindre celle du milieu.
 | Problème | Que faire |
 |---|---|
 | Le premier appel est très lent | Le modèle se charge (environ 10 s) : c'est pour ça qu'on le fait chauffer avant |
+| `Wrong password.` ou `No account for this email` | Faute de frappe : répondre `n` si besoin, relancer `python3 main.py` et ressaisir l'e-mail du compte de démo |
 | `Nothing relevant found` sur une question attendue | Relancer `/index`, puis reposer la question |
 | `MCP server unavailable` ou erreur `web_search` | Vérifier `.env` et `pip install -r requirements.txt` ; sinon, passer l'acte 4 |
 | `fib(42)` réussit dès la 1re tentative | C'est possible : le dire, et montrer les mesures de la boucle dans `benchmarks/README.md` |
 | Une réponse part en anglais | Sans gravité : le modèle de 3B suit la langue la plupart du temps, pas toujours |
 | Une étape bloque | `Ctrl+C` arrête la réponse en cours, pas Sensia |
 
-**Après la démo** : `/remember` a écrit dans `persona/user.md`. Ce fichier est ignoré par git :
-rien ne part dans un commit, mais on peut retirer la ligne pour la démo suivante.
+**Après la démo** : `/remember` a écrit dans `data/profiles/<email>.md`. Ce dossier est ignoré par
+git : rien ne part dans un commit, mais on peut retirer la ligne pour la démo suivante.
 
 ---
 
-## État des vérifications (2026-10-29)
+## État des vérifications (2026-10-31)
 
 | Acte | Vérifié |
 |---|---|
 | 2 (RAG) | Oui : les 3 questions, avec ces réponses et ces scores |
 | 5 (`/code`) | Oui, dans le sandbox Docker : Fibonacci en 1 tentative ; `fib(42)` en 2 tentatives, 18 s ; `/home` et clé : `[]`, `False` |
 | 6 (`/fast`) | Oui : les 3 scénarios, lors des tests du 2026-10-21 |
-| 1, 3, 4, 7, 8 | **À vérifier** : `main.py` ne démarrait pas (import de `core.auth`) et `mcp` n'était pas installé au moment de l'écriture |
+| 1, 3, 4, 7, 8 | **Non rejoué** : les étapes ont été relues et corrigées d'après le code (connexion, persona `dev` pour l'acte 7), mais rien n'a été exécuté. `core/auth.py` et `mcp` (`requirements.txt`) sont maintenant dans le dépôt. À rejouer sur la machine de démo, avec Ollama et la clé LangSearch |

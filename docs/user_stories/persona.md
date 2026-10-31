@@ -22,7 +22,7 @@ Deux utilisateurs différents :
 | 1 | Un persona est un fichier `persona/personas/<nom>.md`. En ajouter un suffit à le rendre disponible : aucune ligne de Python à modifier. |
 | 2 | Le contenu du fichier est envoyé au modèle comme premier message (`role: system`) de la conversation. |
 | 3 | Le nom affiché dans le terminal (`SENSIA: ...`) est lu sur la première ligne qui commence par `# `. Sans titre, le nom affiché est `Assistant`. |
-| 4 | Le persona se choisit au lancement : `python3 main.py --persona dev`. Par défaut : `sensia`. |
+| 4 | Le persona se choisit à la création du compte et revient à chaque connexion. `--persona` n'est plus qu'une vérification du nom : après la connexion, le persona du compte le remplace. |
 | 5 | Un nom de persona inconnu affiche `Unknown persona '<nom>'. Available: dev, sensia`, sans planter. |
 | 6 | La date du jour est ajoutée au prompt système, quel que soit le persona. |
 
@@ -41,7 +41,7 @@ Deux utilisateurs différents :
 | 3 | Après le changement, l'assistant se souvient de ce qui a été dit avant (une information donnée sous `sensia` est retrouvée sous `dev`). |
 | 4 | Le nom affiché change immédiatement (`SENSIA — developer mode: ...`). |
 | 5 | Le nouveau persona s'applique partout : nom affiché, `/remember` et `/fast` (avec `dev`, `/fast` planifie toujours la tâche). |
-| 6 | Le profil utilisateur (`user.md`) est conservé lors du changement. |
+| 6 | Le profil utilisateur (`data/profiles/<email>.md`) est conservé lors du changement. |
 | 7 | `/persona` seul affiche le persona actuel et la liste : `Current persona: sensia. Available: dev, sensia`. |
 | 8 | Un nom inconnu (`/persona toto`) ou un chemin (`/persona ../user`) est refusé : la liste s'affiche, rien ne change. Seuls les fichiers de `persona/personas/` peuvent être chargés. |
 
@@ -49,6 +49,8 @@ Deux utilisateurs différents :
 
 ```
 python3 main.py
+Email: ...
+Password:
 
 You: My name is Romain and I love Rust.
 SENSIA: ...
@@ -70,9 +72,7 @@ Current persona: dev. Available: dev, sensia
 
 ## Hors périmètre (plus tard)
 
-- L'interface web (`--web`) utilise le persona choisi au lancement, mais ne permet pas encore
-  d'en changer en cours de conversation.
-- `/persona` n'apparaît pas encore dans `/help`.
+- `/persona` ne change le persona que pour la session : il n'est pas enregistré dans le compte.
 - Les consignes d'outils (recherche web, commandes) sont écrites dans chaque fichier de
   persona : un nouveau persona doit les recopier pour en profiter.
 - Après un changement, les anciennes réponses restent dans l'historique avec le ton de
