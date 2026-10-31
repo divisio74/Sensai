@@ -18,6 +18,9 @@ def stream_messages(messages, model, url, tools=None, usage=None):
         if not line:
             continue
         chunk = json.loads(line)
+        # Ollama reports a failure during the answer as a chunk, after its 200 status
+        if "error" in chunk:
+            raise requests.exceptions.RequestException(chunk["error"])
         yield chunk["message"]
 
 def stream_chat(messages, model, url, usage=None):
@@ -43,7 +46,7 @@ def chat_with_tools(messages, model, url, tools=None, usage=None):
         print("\nConnection lost with Ollama")
         return None
     except requests.exceptions.RequestException as e:
-        print(f"\nInvalid request: {e}")
+        print(f"\nOllama error: {e}")
         return None
     except KeyboardInterrupt:
         print("\n[interrupted]")
