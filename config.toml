@@ -66,6 +66,10 @@ max_results = 3
 max_text_chars = 2000      # characters kept from each result summary
 timeout = 10               # seconds to reach LangSearch
 
+[mcp]
+command = ""               # external stdio MCP server to start; empty: the built-in core/mcp_server.py
+args = []                  # arguments of that command, e.g. command = "npx", args = ["-y", "some-mcp-server"]
+
 [web]
 host = "127.0.0.1"
 port = 4040

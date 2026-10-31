@@ -7,13 +7,16 @@ from pathlib import Path
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
+from core.config import CONFIG
+
 @asynccontextmanager
 async def _session():
+    server = CONFIG["mcp"]
     # the SDK only forwards a few safe variables by default: pass them all so the
     # server gets LANGSEARCH_API_KEY
     params = StdioServerParameters(
-        command=sys.executable,
-        args=[str(Path(__file__).parent / "mcp_server.py")],
+        command=server["command"] or sys.executable,
+        args=server["args"] if server["command"] else [str(Path(__file__).parent / "mcp_server.py")],
         env=dict(os.environ)
     )
     async with stdio_client(params) as (read, write):
