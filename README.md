@@ -36,6 +36,7 @@ of tasks (small functions, emails, explanations) and works under time constraint
 | Web search chosen by the model, through an MCP server (T1, T3) | `What is new in Python this week?` | [Web search](#web-search-mcp) |
 | Personas, switchable mid-session (A5) | `/persona dev` | [Persona and user profile](#persona-and-user-profile) |
 | Persistent user profile and memory (M1) | `/remember I work in Python` | [Persona and user profile](#persona-and-user-profile) |
+| Local accounts, one profile per account | `python3 main.py`, then your email | [Accounts](#accounts) |
 | Tasks under a time budget, with live prediction (T5, A3) | `/fast 30 Write a reminder email for Monday` | [Time-budgeted tasks](#time-budgeted-tasks-fast) |
 | Web interface (X1) | `python3 main.py --web` | [Web interface](#web-interface) |
 | One configuration file, generation parameters per usage | edit `config.toml` | [Configuration](#configuration) |
@@ -47,11 +48,11 @@ Every feature has its user stories and acceptance criteria in
 
 ## Requirements
 
-- Python 3.10+ (developed on 3.12)
+- Python 3.11+ (`core/config.py` uses `tomllib`; developed on 3.12)
 - [Ollama](https://ollama.com) running locally
-- A LangSearch API key
-- `requests` and `python-dotenv`
-- `fastapi` and `uvicorn` (only for the web interface)
+- A LangSearch API key (optional, only the web search needs it)
+- The packages of `requirements.txt`: `requests`, `python-dotenv`, `fastapi`, `uvicorn` and `mcp`
+  (`main.py` imports all of them, even in the terminal)
 - [Docker](https://docs.docker.com/engine/install/), usable without `sudo`, for the isolated code
   sandbox (without it, Sensia falls back to a local process and says so)
 
@@ -62,11 +63,11 @@ pip install -r requirements.txt
 ollama pull qwen2.5:3b
 ollama pull nomic-embed-text
 docker pull python:3.12-slim
-cp persona/user.example.md persona/user.md   # your own profile, never committed
+cp .env.example .env   # then set LANGSEARCH_API_KEY in it
 ```
 
-Set `LANGSEARCH_API_KEY` in a `.env` file at the project root. The test runner loads this file
-with `python-dotenv`.
+`main.py` and the test runner load `.env` with `python-dotenv`; the file is never committed.
+Without a key, Sensia runs normally, but a web search returns an error to the model.
 
 ## Running
 
@@ -78,7 +79,22 @@ python3 main.py --persona dev
 python3 main.py --web
 python3 main.py --help
 ```
-`--model`, `--url` and `--persona` work the same way with `--web`.
+`--model` and `--url` work the same way with `--web`. `--persona` must name an existing persona,
+but it does not decide the persona of the session: after the login, the one of the account applies
+(see [Accounts](#accounts)).
+
+## Accounts
+
+Both interfaces ask you to log in before the chat starts.
+
+- **Terminal**: `python3 main.py` asks for your email, then your password. For an unknown email,
+  it offers to create an account: it asks for a password, a persona and a few words about you.
+- **Web**: the login page has the same fields. *Log in* uses the email and password, *Create
+  account* uses every field. *Log out* is in the top bar of the chat.
+
+Accounts live in `data/`, which is ignored by git: `data/users.json` holds the salted password
+hashes (PBKDF2-SHA256) and the persona of each account, and `data/profiles/<email>.md` holds the
+profile. There is no password reset.
 
 ## Configuration
 
@@ -135,9 +151,9 @@ below (benchmarks, `/fast` bench).
 | `/rag <question>` | answers from the documents and lists the sources | ✅ |
 | `/code <task>` | runs the self-correcting code agent on `<task>` (Python only) | ✅ (code and output shown) |
 | `/fast <seconds> <task>` | runs a task within a time budget | ❌ terminal only |
-| `/persona` | shows the current persona and the available ones | ❌ terminal only |
-| `/persona <name>` | switches persona mid-conversation, the history is kept | ❌ terminal only |
-| `/remember <fact>` | saves a fact in the user profile, used right away and in later sessions | ❌ terminal only |
+| `/persona` | shows the current persona and the available ones | ✅ |
+| `/persona <name>` | switches persona mid-conversation, the history is kept | ✅ |
+| `/remember <fact>` | saves a fact in the user profile, used right away and in later sessions | ✅ |
 | `quit` | exits | — |
 | `Ctrl+C` / `Ctrl+D` | exits cleanly | — |
 
@@ -159,9 +175,9 @@ assistant can talk about code it produced in a *separate* conversation.
 
 ## Web interface
 
-`python3 main.py --web` starts a small FastAPI server and serves a chat page on
-http://127.0.0.1:4040. The page sends what the user types to the server, which answers with the
-same code as the terminal.
+`python3 main.py --web` starts a small FastAPI server on http://127.0.0.1:4040, which serves a
+login page, then the chat page. The page sends what the user types to the server, which answers
+with the same code as the terminal.
 
 ```
 browser (web/index.html, css, js)          web.py (FastAPI)
@@ -170,6 +186,7 @@ browser (web/index.html, css, js)          web.py (FastAPI)
                                              or stream_chat()  ──► Ollama
    ◄─────────────── the answer, piece by piece  (text stream)
    GET /api/history  ────────────────────►  the conversation (to redraw it after a reload)
+   POST /api/login, /api/register, /api/logout  ──►  core/auth.py, opens or closes the session
 ```
 
 ### Technical decisions
@@ -181,7 +198,7 @@ written once and behaves the same in both interfaces.
 **The conversation is kept by the server.** Like `main.py`, `web.py` keeps one `messages` list.
 The page only displays what the server returns, so `/undo` or `/clear` need no logic in
 JavaScript, and reloading the page does not lose the conversation. Sensai is a local, single-user
-assistant, so one list is enough.
+assistant, so one list and one logged-in account at a time are enough.
 
 **Streaming with a Python generator.** `stream_chat()` in `core/llm.py` *yields* each piece of
 the answer as Ollama produces it. The terminal prints the pieces, the web sends them through a
@@ -198,8 +215,11 @@ type checking, at the cost of a toolchain far heavier than this interface needs.
 - The answers of `/rag`, `/code` and `/retry` are shown at once, not streamed.
 - Reloading the page while an answer is streaming loses that answer.
 - In the web, the chat does not pass the MCP tools to the model, so it cannot search the web.
-  `/fast`, `/persona`, `/remember` and the user profile only work in the terminal for now.
-- All browser tabs share the same conversation, which is lost when the server restarts.
+- `/fast` only works in the terminal: in the web, it is sent to the model as a plain message.
+- All browser tabs share the same conversation and the same account. There is no session cookie:
+  the server remembers one logged-in account, for every browser that reaches it. Logging in again
+  replaces that account and starts a new conversation.
+- Restarting the server logs out and loses the conversation.
 - Command bubbles (`/help`, sources of `/rag`...) are saved by the browser, not by the server.
 
 ---
@@ -211,8 +231,7 @@ who the assistant is, and who the user is.
 
 ```
 persona/personas/<name>.md   the assistant: name (first "# " line), tone, role, values
-persona/user.md              the user: about me, preferences, remembered facts (local, not versioned)
-persona/user.example.md      the empty template it is created from
+data/profiles/<email>.md     the user: about me, preferences, remembered facts (local, not versioned)
 ```
 
 ```
@@ -220,12 +239,11 @@ messages[0] = {"role": "system", "content":
     <persona/personas/sensia.md>
     Today's date is 2026-10-29.
     About the user you are talking to. Their preferences below override your default behavior:
-    <persona/user.md>
+    <data/profiles/<email>.md>
 }
 ```
 
 ```
-python3 main.py --persona dev        start with another persona
 You: /persona dev                    switch mid-conversation
 Switched to SENSIA — developer mode (conversation kept)
 You: /remember I am allergic to penicillin
@@ -246,12 +264,12 @@ reads as-is and a human edits easily, so no parser is needed.
 `/persona` rebuilds it and leaves every other message untouched, so the new persona keeps the
 whole conversation. `/remember` uses the same mechanism to refresh the profile immediately.
 
-**One profile per user, outside git.** `persona/user.md` holds personal information, so it is
-ignored by git: each user copies `persona/user.example.md` or simply runs `/remember`, which
-creates the file from the template. Without it, Sensia runs normally, without a profile.
+**One profile per account, outside git.** A profile holds personal information, so `data/` is
+ignored by git. The profile is created with the account, from what the user wrote about themselves,
+and is loaded at login.
 
 **Two files: the assistant is read-only, the user profile is writable.** `/remember` only ever
-writes to `persona/user.md`. If facts could be written into the persona file, a user could make
+writes to the profile of the account. If facts could be written into the persona file, a user could make
 the assistant "remember" that it has no rules anymore, and that change would be permanent.
 
 **Only listed personas can be loaded.** `/persona` checks the name against `list_personas()`
@@ -277,11 +295,9 @@ tells the model the facts describe the user, not itself.
   priority sentence: the profile works for preferences that complete the persona.
 - Saying "remember that..." in plain language does nothing: `/remember` must be typed. A
   `remember` tool called by the model, like `web_search`, is the natural next step.
-- `/remember` alone (no text) answers `Unknown command`, and `/persona` and `/remember` are not
-  listed in `/help`.
-- The web interface uses the persona chosen at launch, but neither the user profile nor
-  `/persona` / `/remember`.
-- Facts are appended at the end of `user.md`, so `## Remembered facts` must stay the last
+- The persona of a session is the one chosen when the account was created. `--persona` does not
+  change it, and `/persona <name>` only lasts until the next login.
+- Facts are appended at the end of the profile, so `## Remembered facts` must stay the last
   section, and the profile grows without limit in a 4096-token context.
 - The profile is a local file: it is not shared between machines (it is ignored by git on
   purpose, since it holds personal information).
@@ -439,6 +455,7 @@ main.py                  CLI, chat history, command dispatch, tool-call loop
 ├── core/commands.py     commands shared by the CLI and the web (/help, /undo, /rag, /code...)
 ├── core/llm.py          HTTP transport to Ollama, NDJSON streaming, tools (stream_chat, chat)
 ├── core/persona.py      persona and user profile -> system prompt
+├── core/auth.py         local accounts: register, login, path of each profile
 ├── core/boucle.py       the reflection loop  (code_cycle)
 ├── core/code_extract.py pulls Python out of the model's markdown answer
 ├── core/mcp_client.py   starts the MCP server, lists and calls its tools
@@ -652,21 +669,24 @@ mid-session, the isolated Docker sandbox.
 
 ```
 main.py                  entry point, CLI, chat loop (--web starts the web interface)
-web.py                   FastAPI server: /api/chat, /api/history, static files
+web.py                   FastAPI server: /api/chat, /api/history, login routes, static files
 web/
     index.html           chat page
+    login.html           login and account creation page
     css/style.css        design
     js/app.js            sends the text, reads the stream, redraws the conversation
+    js/login.js          sends the login and account creation forms
 config.toml              every tunable value: Ollama, generation options, RAG, code, web...
 core/
     config.py            CONFIG, options(usage), TIMEOUT
-    commands.py          handle_command(text, messages, model, url) -> str | None
+    commands.py          handle_command(text, messages, model, url, user) -> str | None
     llm.py               stream_chat(messages, model, url) -> yields str
                          chat(messages, model, url) -> str | None
     boucle.py            code_cycle(task, model, url, max_iterations=3) -> dict
     code_extract.py      extract_code(text) -> str
     persona.py           load_persona(id), list_personas(), get_persona_name(id),
-                         load_user_profile(), remember(fact), build_system_prompt(...)
+                         load_user_profile(file), remember(fact, file), build_system_prompt(...)
+    auth.py              register(...), login(email, password), user_exists(email), profile_path(email)
     mcp_client.py        get_tools(), call_tool(name, arguments)
     mcp_server.py        MCP server: web_search(query, freshness)
 rag/
@@ -679,8 +699,10 @@ benchmarks/
     models.py            speed, memory and code-loop success of several models
 persona/
     personas/*.md        one file per assistant persona (sensia, dev)
-    user.example.md      empty profile template (versioned)
-    user.md              your own profile, completed by /remember (git-ignored)
+    user.example.md      empty profile template, used by /remember if a profile file is missing
+data/                    accounts and profiles (git-ignored)
+    users.json           salted password hashes and the persona of each account
+    profiles/<email>.md  the profile of each account, completed by /remember
 docs/user_stories/       user stories of every feature + traceability table
 tools/
     sandbox.py           run_python(code, timeo) -> dict: Docker container, or hardened process
