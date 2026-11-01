@@ -50,4 +50,3 @@ SENSIA: Cette semaine, ... (date) ... Sources : python.org/..., ...
 
 - **Confidentialité** : la requête quitte la machine vers LangSearch, contrairement au reste
   de Sensia qui est entièrement local.
-- Pas encore disponible dans l'interface web.

@@ -146,9 +146,10 @@ modèle. S'il est joué seul, taper d'abord `/persona dev`.
 | `quit`, puis `python3 main.py --web` | le serveur sur `http://127.0.0.1:4040` | Interface découplée, même backend |
 | ouvrir l'adresse, puis se connecter avec le compte de démo | la page de connexion, puis la page de discussion | Le même compte et le même profil que dans le terminal |
 | une question, puis `/code Write a Python function that returns the first 15 Fibonacci numbers and print them` | la réponse en streaming, puis le code et sa sortie dans la page | Les mêmes commandes que le terminal |
+| `Quelles sont les nouveautés de Python cette semaine ?` | `[Tool web_search: {...}]` pendant le streaming, puis la synthèse datée | Le même serveur MCP que dans le terminal |
 
-`/persona` et `/remember` fonctionnent aussi dans le web. `/fast` et la recherche web ne sont pas
-disponibles : un `/fast` y part vers le modèle comme un message ordinaire, donc ne pas le taper ici.
+`/persona` et `/remember` fonctionnent aussi dans le web. `/fast` n'est pas disponible : il y part
+vers le modèle comme un message ordinaire, donc ne pas le taper ici.
 
 ---
 
