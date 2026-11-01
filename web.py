@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 from core.config import CONFIG
-from core.llm import stream_messages
+from core.llm import stream_messages, LAST_USAGE
 from core.mcp_client import get_tools, call_tool
 from core.persona import load_persona, build_system_prompt, list_personas, load_user_profile
 from core.commands import handle_command
@@ -30,6 +30,12 @@ class LoginRequest(BaseModel):
     password: str
     persona: str = "sensia"
     about: str = ""
+
+def context_usage():
+    used = LAST_USAGE["prompt"] + LAST_USAGE["answer"]
+    if len(messages) == 1:
+        used = 0
+    return {"used": used, "max": CONFIG["generation"]["num_ctx"]}
 
 def check_logged_in():
     if CURRENT_USER is None:
@@ -92,7 +98,8 @@ def api_logout():
 @app.get("/api/history")
 def api_history():
     check_logged_in()
-    return {"messages": messages[1:]}
+    return {"messages": messages[1:], "context": context_usage()}
+
 
 def stream_answer(text):
     start = len(messages)
@@ -130,7 +137,7 @@ def api_chat(request: ChatRequest):
     check_logged_in()
     output = handle_command(request.text, messages, MODEL, OLLAMA_URL, CURRENT_USER)
     if output is not None:
-        return {"output": output, "messages": messages[1:]}
+        return {"output": output, "messages": messages[1:], "context": context_usage()}
     return StreamingResponse(stream_answer(request.text), media_type="text/plain")
 
 def run(model, url, persona):

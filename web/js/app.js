@@ -4,6 +4,7 @@ const input = document.getElementById("input");
 const send = document.getElementById("send");
 const newChat = document.getElementById("new-chat");
 const logout = document.getElementById("logout");
+const context = document.getElementById("context");
 
 function scrollDown()
 {
@@ -68,6 +69,15 @@ function showCommandOutput(text)
     content.classList.add("command");
     renderText(content, text);
     scrollDown();
+}
+
+function showContext(usage)
+{
+    if (!usage)
+        return;
+    const percent = Math.round(usage.used / usage.max * 100);
+    context.textContent = `${usage.used} / ${usage.max} tokens (${percent}%)`;
+    context.classList.toggle("full", percent >= 80);
 }
 
 let notes = JSON.parse(localStorage.getItem("notes") || "[]");
@@ -174,6 +184,7 @@ form.addEventListener("submit", async (event) => {
 
     if (data.messages) {
         showConversation(data.messages);
+        showContext(data.context);
     } else {
         chat.lastChild.remove();
         showCommandOutput(data.output);
@@ -187,6 +198,7 @@ newChat.addEventListener("click", async () => {
     notes = [];
     saveNotes();
     showConversation(data.messages || []);
+    showContext(data.context);
     input.focus();
 });
 
@@ -198,5 +210,8 @@ logout.addEventListener("click", async () => {
 
 fetch("/api/history")
     .then((response) => response.json())
-    .then((data) => showConversation(data.messages))
+    .then((data) =>  {
+        showConversation(data.messages);
+        showContext(data.context);
+    })
     .catch(() => {});

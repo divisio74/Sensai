@@ -3,6 +3,8 @@ import json
 
 from core.config import TIMEOUT, options
 
+LAST_USAGE = {"prompt": 0, "answer": 0}
+
 def stream_messages(messages, model, url, tools=None, usage=None):
     payload = {
         "model": model,
@@ -21,6 +23,9 @@ def stream_messages(messages, model, url, tools=None, usage=None):
         # Ollama reports a failure during the answer as a chunk, after its 200 status
         if "error" in chunk:
             raise requests.exceptions.RequestException(chunk["error"])
+        if chunk.get("done"):
+            LAST_USAGE["prompt"] = chunk.get("prompt_eval_count", 0)
+            LAST_USAGE["answer"] = chunk.get("eval_count", 0)
         yield chunk["message"]
 
 def stream_chat(messages, model, url, usage=None):
