@@ -101,7 +101,7 @@ function showConversation(messages)
     messages.forEach((message, index) => {
         if (message.role === "user")
             showUser(message.display || message.content);
-        else if (message.role === "assistant")
+        else if (message.role === "assistant" && message.content)
             showAssistant(message.content);
         showNotes(index + 1);
     });

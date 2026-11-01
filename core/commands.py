@@ -31,9 +31,9 @@ def clear(messages):
 def undo(messages):
     if len(messages) <= 1:
         return "Nothing to undo."
-    if messages[-1]["role"] == "assistant":
+    while len(messages) > 1 and messages[-1]["role"] != "user":
         messages.pop()
-    if len(messages) > 1 and messages[-1]["role"] == "user":
+    if len(messages) > 1:
         messages.pop()
     return "Last exchange removed."
 
