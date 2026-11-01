@@ -1,4 +1,5 @@
 import os
+import shutil
 import sys
 import unittest
 from pathlib import Path
@@ -9,6 +10,8 @@ from core.mcp_client import call_tool, get_tools
 
 SERVER = str(Path(__file__).resolve().parent.parent / "core" / "mcp_server.py")
 EXTERNAL = {"mcp": {"command": sys.executable, "args": [SERVER]}}
+DOCS = Path(__file__).resolve().parent.parent / "knowledge" / "documents"
+THIRD_PARTY = {"mcp": {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-filesystem", str(DOCS)]}}
 
 
 class ExternalServer(unittest.TestCase):
@@ -29,6 +32,23 @@ class ExternalServer(unittest.TestCase):
     def test_configured_command_is_the_one_started(self):
         with self.assertRaises(Exception):
             get_tools()
+
+
+@unittest.skipUnless(shutil.which("npx"), "npx is not installed")
+class ThirdPartyServer(unittest.TestCase):
+    @patch.dict(CONFIG, THIRD_PARTY)
+    def test_lists_its_tools(self):
+        names = [tool["function"]["name"] for tool in get_tools()]
+        self.assertIn("list_directory", names)
+
+    @patch.dict(CONFIG, THIRD_PARTY)
+    def test_calls_a_tool(self):
+        self.assertIn("sensia_guide.md", call_tool("list_directory", {"path": str(DOCS)}))
+
+    @patch.dict(CONFIG, THIRD_PARTY)
+    def test_tool_error_is_raised(self):
+        with self.assertRaisesRegex(RuntimeError, "(?i)access denied"):
+            call_tool("list_directory", {"path": str(DOCS.parent.parent)})
 
 
 if __name__ == "__main__":

@@ -19,6 +19,7 @@ au jury.
 - [ ] **Créer le compte de démo** : `python3 main.py`, saisir un e-mail, répondre `y` à `No account for this email. Create one?`, choisir un mot de passe (il ne s'affiche pas), le persona `sensia`, puis se présenter, par exemple `My name is Pierre.`. Le compte et le profil sont dans `data/`, local et ignoré par git.
 - [ ] `python3 main.py` démarre sans erreur et accepte ce compte, puis `quit`.
 - [ ] **Faire chauffer le modèle** : lancer une fois `/fast 30 Écris un mail de relance pour lundi`. Sinon, le premier appel coûte environ 10 s de chargement.
+- [ ] **Remplir l'historique de `/fast`** : `knowledge/history/` est ignoré par git, donc il est vide sur un nouveau clone. Lancer deux fois les 3 commandes `/fast` de l'acte 6 et répondre `y` aux questions. Sinon, l'acte 6 ne suit pas ce script : `Similar past tasks: 0/0`, et la tâche est annulée dès le départ si on répond `n`.
 - [ ] Ne pas vider `knowledge/history/` : c'est lui qui rend les prédictions de `/fast` précises.
 - [ ] Fermer les applications lourdes : sur CPU, la vitesse dépend de la mémoire disponible.
 
@@ -31,7 +32,7 @@ au jury.
 | Je tape | On doit voir | Ce que ça montre |
 |---|---|---|
 | `python3 main.py`, puis l'e-mail et le mot de passe du compte de démo | `Email:`, `Password:`, puis `You:` | Démarrage, vérification d'Ollama, connexion |
-| `Bonjour, qui es-tu ?` | `SENSIA: ...` qui s'écrit mot à mot, et qui t'appelle par ton prénom | Streaming, persona, profil injecté dès le premier message |
+| `Bonjour, qui es-tu et comment je m'appelle ?` | `SENSIA: ...` qui s'écrit mot à mot, et qui donne ton prénom | Streaming, persona, profil injecté dès le premier message |
 | `/remember Je code surtout en Python` | `Fact remembered.` | Mémoire persistante |
 | `Quel langage j'utilise ?` | `... Python ...` | Le fait est utilisé tout de suite |
 
@@ -85,6 +86,9 @@ Ce changement ne dure que la session : à la connexion suivante, Sensia reprend 
 > exposé par notre serveur MCP. C'est la seule donnée qui quitte la machine, et c'est documenté
 > dans les limites. »
 
+**Sans clé LangSearch, ne pas jouer cet acte** : le modèle appelle bien l'outil, mais il reçoit une
+erreur et peut ensuite inventer une actualité (vu dans le web : une « nouveauté » de 2023).
+
 ---
 
 ## Acte 5 — Du code qui tourne vraiment (T2, A1)
@@ -95,7 +99,7 @@ Ce changement ne dure que la session : à la connexion suivante, Sensia reprend 
 |---|---|---|
 | `/code Write a Python function that returns the first 15 Fibonacci numbers and print them` | `Succeeded in 1 attempt(s)` et la vraie sortie `[0, 1, 1, 2, 3, 5, 8, ...]` | Génération, exécution dans un processus séparé |
 | `/code Compute fib(42) with naive recursion and print it` | `Attempt 1/3`, `Failure: Timeout: the code did not finish within 10 seconds...`, puis `Succeeded in 2 attempt(s)` et `267914296` (environ 18 s) | La boucle de correction : l'erreur réelle est renvoyée au modèle, qui change d'algorithme |
-| `Explique ce que tu viens de faire` | une explication de la version corrigée | Le résultat de `/code` est dans l'historique |
+| `Explique pourquoi la deuxième tentative est plus rapide que la première` | récursif contre itératif | Le résultat de `/code` est dans l'historique |
 | `/code Print the list of folders in /home, then print True or False depending on whether the environment variable LANGSEARCH_API_KEY exists` | `Output: []` puis `False` | Le code tourne dans un conteneur Docker : il ne voit ni tes fichiers, ni ta clé, ni Internet |
 
 > **À dire** : « Le modèle ne se juge pas lui-même : c'est la vraie trace de l'interpréteur qui lui
@@ -113,7 +117,7 @@ Ce changement ne dure que la session : à la connexion suivante, Sensia reprend 
 | Je tape | On doit voir | Ce que ça montre |
 |---|---|---|
 | `/fast 30 Écris un mail de relance pour lundi` | `PLAN [write]`, `Learned speed: ~19 tokens/s`, `Initial prediction: ~7s`, la ligne `⏳` qui bouge, `Budget: 30s -> kept` | Plan construit en Python, prédiction apprise sur cette machine |
-| `/fast 8 Explain how HTTP caching works and compare it with a CDN for a beginner audience` | `✂ answer shortened to ~65 words to fit the budget (~6s instead of ~12s)`, puis `Budget: 8s -> kept` | Sensia réduit la tâche à l'essentiel pour tenir le budget |
+| `/fast 8 Explain how HTTP caching works and compare it with a CDN for a beginner audience` | `✂ answer shortened to ~65 words to fit the budget (~6s instead of ~12s)`, puis `Budget: 8s -> kept`, ou `Continue anyway? [y/N]` → `n` si le temps manque | Sensia réduit la tâche à l'essentiel pour tenir le budget, et le dit quand ça ne suffit pas |
 | `/fast 15 Write a Python class for a bank account with deposit and withdraw, run 3 operations, then explain how it works` | `PLAN [code → explain]`, code vérifié, puis `Budget: 15s -> updated prediction: 18s`, `Continue anyway? [y/N]` → répondre `n` | Revérification en cours de route ; l'utilisateur garde la main |
 
 > **À dire** : « La prédiction fusionne deux estimations : ce que la machine fait d'habitude, et le
@@ -136,6 +140,10 @@ arrive dès le départ, répondre `y` pour atteindre celle du milieu.
 
 Cet acte demande le persona `dev`, actif depuis l'acte 3 : seul ce persona décrit cet outil au
 modèle. S'il est joué seul, taper d'abord `/persona dev`.
+
+**Ne pas jouer cet acte** : il n'a marché dans aucune des 6 prises. Avec les outils MCP actifs, le
+JSON `{"tool": "fast", ...}` ne revient jamais à Sensia : la réponse est vide ou sans appel d'outil.
+Pour montrer la confirmation, utiliser `Continue anyway? [y/N]` de l'acte 6.
 
 ---
 
@@ -174,17 +182,34 @@ vers le modèle comme un message ordinaire, donc ne pas le taper ici.
 | `fib(42)` réussit dès la 1re tentative | C'est possible : le dire, et montrer les mesures de la boucle dans `benchmarks/README.md` |
 | Une réponse part en anglais | Sans gravité : le modèle de 3B suit la langue la plupart du temps, pas toujours |
 | Une étape bloque | `Ctrl+C` arrête la réponse en cours, pas Sensia |
+| `/rag` sur le modèle d'embedding répond qu'il ne trouve pas (2 prises sur 10) | La bonne source reste affichée : reposer la question |
+| Le test `/home` affiche `True` (1 prise sur 10) | Le code généré a créé la variable lui-même : le montrer dans le code, puis relancer la commande |
+| `/fast 15` finit par `Max try reached` et un `RESULT` vide (5 prises sur 10) | Le code généré retire plus que le solde et plante à chaque tentative : le dire, puis passer à l'acte suivant |
 
 **Après la démo** : `/remember` a écrit dans `data/profiles/<email>.md`. Ce dossier est ignoré par
 git : rien ne part dans un commit, mais on peut retirer la ligne pour la démo suivante.
 
 ---
 
-## État des vérifications (2026-10-31)
+## État des vérifications (2026-11-01)
 
-| Acte | Vérifié |
+Rejoué 10 fois en entier sur la vraie application, dans un vrai terminal, sous Windows (`python`
+au lieu de `python3`), avec Docker. **Ce n'est pas la machine de démo** : environ 47 tokens/s,
+contre environ 18 sur la machine de référence. Les temps de `/fast` y seront donc différents.
+
+Une partie de ces prises tournait avec un essai de correctif de l'acte 7, retiré depuis, qui ajoutait
+un outil au persona `dev`. Les messages libres de ce persona (actes 3, 4 et 5) sont donc à revérifier.
+
+| Acte | Résultat |
 |---|---|
-| 2 (RAG) | Oui : les 3 questions, avec ces réponses et ces scores |
-| 5 (`/code`) | Oui, dans le sandbox Docker : Fibonacci en 1 tentative ; `fib(42)` en 2 tentatives, 18 s ; `/home` et clé : `[]`, `False` |
-| 6 (`/fast`) | Oui : les 3 scénarios, lors des tests du 2026-10-21 |
-| 1, 3, 4, 7, 8 | **Non rejoué** : les étapes ont été relues et corrigées d'après le code (connexion, persona `dev` pour l'acte 7), mais rien n'a été exécuté. `core/auth.py` et `mcp` (`requirements.txt`) sont maintenant dans le dépôt. À rejouer sur la machine de démo, avec Ollama et la clé LangSearch |
+| 1 (profil) | Oui. Avec l'ancienne question `Bonjour, qui es-tu ?`, le prénom manquait dans 4 prises sur 6 ; avec la nouvelle, 0 sur 4 |
+| 2 (RAG) | Oui : scores 0,75 et 0,67, question hors sujet refusée 10 fois sur 10. `274 MB` manque dans 2 prises sur 10 |
+| 3 (persona) | Oui, 10 fois sur 10 |
+| 4 (outil décidé par le modèle) | **Partiel** : `web_search` appelé 10 fois sur 10, mais sans clé LangSearch. La synthèse datée et ses sources restent à vérifier avec une clé |
+| 5 (`/code`) | Oui, dans le sandbox Docker : Fibonacci en 1 tentative, `fib(42)` en 2 tentatives. `/home` et clé : `[]`, `False` dans 9 prises sur 10. L'ancienne question `Explique ce que tu viens de faire` faisait inventer au modèle une fausse correction |
+| 6 (`/fast`) | Oui avec un historique rempli, sauf `/fast 8`, tenu dans 2 prises sur 10 seulement : ici, la préparation prend déjà 5 s |
+| 7 (confirmation) | **Non** : 0 prise sur 6, réponse vide ou sans appel d'outil |
+| 8 (web) | Une prise : connexion, question, `/code`, `/persona`, `/remember` fonctionnent. Recherche sans clé : voir l'acte 4 |
+
+**Reste à faire** : rejouer sur la machine de démo avec la clé LangSearch, et remplacer la diapo
+d'attendu de la keynote par les vraies captures.

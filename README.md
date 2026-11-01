@@ -396,7 +396,12 @@ for a summary with dates, then the sources, never a bare list of links.
 - **Privacy**: the query leaves the machine and goes to LangSearch, unlike the rest of Sensia.
   This is the only external call; it needs a key in `.env` and can be avoided by not asking
   for recent information.
-- Each tool call starts the MCP server process again (about 1 s).
+- Each tool call starts the MCP server process again (about 1 s; 3 to 8 s for a third-party server
+  started with `npx`).
+- Third-party servers work through `[mcp]` in `config.toml` (tried with
+  `@modelcontextprotocol/server-filesystem` and `server-everything`), but the small model does not
+  always use their tools: it often claims it cannot read a file. Measures:
+  [`docs/user_stories/web_search.md`](docs/user_stories/web_search.md).
 
 ---
 

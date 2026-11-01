@@ -23,7 +23,7 @@ qui fait souvent le même genre de tâches. Il veut du code qui marche, rapideme
 | 6 | Si même le minimum prévu dépasse le budget, Sensia demande `Continue anyway? [y/N]` avant de lancer quoi que ce soit ; `n` affiche `Cancelled.` |
 | 7 | Les étapes `code` passent par `code_cycle` : le code est exécuté dans le sandbox et corrigé jusqu'à 3 fois. |
 | 8 | À la fin, Sensia affiche la durée réelle et `Budget: <n>s -> kept` ou `exceeded`, puis le livrable complet, sans le remplacer par un commentaire de vérification. |
-| 9 | Si l'utilisateur demande en langage naturel une tâche dans un temps donné, le modèle peut lancer `/fast` lui-même avec le format réservé `{"tool": "fast", ...}` ; la commande comprise est affichée et n'est exécutée qu'après `y`. Au plus une exécution par message. |
+| 9 | Si l'utilisateur demande en langage naturel une tâche dans un temps donné, le modèle peut lancer `/fast` lui-même avec l'outil natif `fast`, proposé au persona `dev` seulement ; la commande comprise est affichée et n'est exécutée qu'après `y`. Au plus une exécution par message. |
 
 ## User story 2 — Tenir le budget pendant l'exécution
 
@@ -105,4 +105,7 @@ tenu 20 fois sur 24, et les 4 dépassements avaient tous été annoncés avant d
 
 - Les étapes `code` ne sont pas suivies en direct : le budget est revérifié à leur fin.
 - `/fast` n'est pas disponible dans l'interface web.
+- Sans limite de temps, le modèle peut quand même appeler l'outil `fast` (4 fois sur 10 sur
+  « Écris une fonction Python qui inverse une chaîne. ») : la question `Run it? [y/N]` protège,
+  et répondre `n` suffit.
 - L'étape `research` ne cherche pas encore sur le web : le modèle répond de mémoire.
