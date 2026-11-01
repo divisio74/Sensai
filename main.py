@@ -12,6 +12,7 @@ from core.commands import handle_command
 from web import run
 from getpass import getpass
 from core.auth import login, register, user_exists, profile_path
+from core.history import load_history, save_history
 
 
 
@@ -219,9 +220,13 @@ def main():
     persona = user["persona"]
     profile_file = profile_path(user["email"])
     system_message = build_system_prompt(load_persona(persona), load_user_profile(profile_file))
-    messages = [system_message]
+    history = load_history(user["email"])
+    messages = [system_message] + history
+    if history:
+        print(f"Previous conversation restored ({len(history)} messages). Type /clear to start over.")
 
     while True:
+        save_history(user["email"], messages)
         try:
             user_input = input("You: ")
         except (EOFError, KeyboardInterrupt):
