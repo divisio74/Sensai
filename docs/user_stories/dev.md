@@ -1,4 +1,4 @@
-# User story — Tâches avec un budget de temps (`/fast`)
+# User story — Tâches avec un budget de temps (`/fast`, T5)
 
 ## Persona
 
@@ -56,6 +56,29 @@ qui fait souvent le même genre de tâches. Il veut du code qui marche, rapideme
 | 3 | Les tâches semblables déjà lancées sont retrouvées par similarité d'embeddings et listées (`Similar past tasks`). |
 | 4 | Une réponse raccourcie pour tenir un budget n'entre pas dans l'apprentissage, pour ne pas fausser la longueur normale. |
 | 5 | Mesuré : l'erreur de la prédiction de départ passe de 37 % pour une tâche nouvelle à 24 % pour une tâche déjà lancée au moins deux fois (70 exécutions rejouées). |
+
+## User story 4 — Un plan dans un format fiable
+
+> En tant que développeur, je veux que le modèle réponde dans un format imposé quand il prépare
+> une tâche, afin que Sensia puisse toujours lire sa réponse et construire le plan.
+
+### Critères d'acceptation
+
+| # | Critère |
+|---|---|
+| 1 | La classification envoie à Ollama un schéma JSON dans le champ `format` : un objet avec un champ obligatoire `deliverable`. |
+| 2 | `deliverable` ne peut valoir que `text`, `code` ou `explanation`. |
+| 3 | La classification utilise une température de 0 (section `[generation.plan]`). |
+| 4 | Réponse qui n'est pas du JSON, sans `deliverable` ou avec une valeur hors liste : la tâche est classée `text`, sans plantage. |
+| 5 | Si le modèle répond `text` alors que la demande contient un mot comme `function` ou `script`, une règle en Python la reclasse en `code`. |
+| 6 | Mesuré : 36 réponses sur 36 au format valide, et 34 classements corrects sur 36 ; les 2 erreurs sont corrigées par la règle du critère 5. |
+
+### Scénario de démo
+
+```
+python3 -c "from core.config import CONFIG; from timepred.plan import make_plan; print([s['type'] for s in make_plan('Write a Python function that checks prime numbers, then explain how it works', CONFIG['ollama']['model'], CONFIG['ollama']['chat_url'], allow_direct=False)])"
+['code', 'explain']
+```
 
 ## Scénario de démo
 

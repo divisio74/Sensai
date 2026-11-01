@@ -40,6 +40,33 @@ machine.
 | 7 | Sans index : `No index found (run /index first) or Ollama is not reachable.` |
 | 8 | Dans l'historique, la question est gardée telle que l'utilisateur l'a écrite, pas le long prompt d'extraits : la suite de la conversation reste lisible. |
 
+## User story 3 — Ne garder que les extraits assez proches
+
+> En tant que développeur, je veux que chaque extrait reçoive un score et que je puisse régler
+> le niveau exigé, afin que le modèle ne réponde jamais à partir d'extraits hors sujet.
+
+### Critères d'acceptation
+
+| # | Critère |
+|---|---|
+| 1 | Chaque morceau de l'index reçoit un score : sa similarité cosinus avec la question. |
+| 2 | Les morceaux sont classés du score le plus haut au plus bas. Seuls les `top_k` premiers sont examinés, et ceux sous `threshold` sont écartés : le modèle peut donc recevoir moins de 3 extraits. |
+| 3 | `top_k` et `threshold` se règlent dans la section `[rag]` de `config.toml`, sans toucher au code ; la nouvelle valeur s'applique au redémarrage de Sensia. |
+| 4 | Le prompt ne contient que les extraits gardés, numérotés, avec leur fichier et leur ligne. |
+| 5 | Le score de chaque extrait gardé est affiché à deux décimales sous la réponse. |
+
+### Scénario de démo
+
+```
+Avec threshold = 0.65 :
+You: /rag Quels fichiers sont lus par le RAG ?
+Sources: knowledge/documents/sensia_guide.md - line 27 - score 0.71
+
+Avec threshold = 0.80, après redémarrage :
+You: /rag Quels fichiers sont lus par le RAG ?
+Nothing relevant found in the documents
+```
+
 ## Scénario de démo
 
 ```
@@ -55,5 +82,5 @@ Nothing relevant found in the documents
 
 ## Hors périmètre
 
-- Pas de reranking ni de filtrage par métadonnées (date, auteur).
+- Pas de reranking ni de filtrage par métadonnées (date, auteur) : de R2, seul le score par extrait est couvert.
 - L'index est entièrement recalculé à chaque `/index`.
