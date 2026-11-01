@@ -54,20 +54,34 @@ plusieurs mois ne peut pas répondre seul.
 
 ### Scénario de démo
 
-Pas encore rejoué avec un serveur tiers : `tests/test_mcp_client.py` lance seulement
-`core/mcp_server.py` comme commande externe.
+Rejoué le 2026-11-01 avec `qwen2.5:3b` et deux serveurs publiés, sans changer le code de Sensia.
 
 ```
 Dans config.toml :
 [mcp]
 command = "npx"
-args = ["-y", "@modelcontextprotocol/server-filesystem", "/chemin/absolu/vers/knowledge/documents"]
+args = ["-y", "@modelcontextprotocol/server-everything"]
 
-You: Quels fichiers y a-t-il dans /chemin/absolu/vers/knowledge/documents ?
+You: Calcule 1234 + 4321.
 SENSIA:
-[Tool list_directory: {'path': '/chemin/absolu/vers/knowledge/documents'}]
-SENSIA: Ce dossier contient sensia_guide.md.
+[Tool get-sum: {'a': 1234, 'b': 4321}]
+SENSIA: The sum of 1234 and 4321 is 5555.
 ```
+
+Sous Windows, écrire un chemin entre apostrophes pour garder les `\` :
+`args = ["-y", "@modelcontextprotocol/server-filesystem", 'C:\chemin\knowledge\documents']`.
+
+| Serveur | Demande | Résultat |
+|---|---|---|
+| `server-everything` (16 outils) | `Calcule 1234 + 4321.` | `get-sum` appelé, `5555` : 5 fois sur 5 |
+| `server-everything` | `Renvoie-moi le message « bonjour jury » avec l'outil echo.` | `echo` appelé, message rendu : 5 fois sur 5 |
+| `server-filesystem` (14 outils) | `Quels fichiers y a-t-il dans <dossier> ?` | `list_directory` appelé : 6 fois sur 6, une fois de plus dans le terminal et une dans le web |
+| `server-filesystem` | `Lis le fichier <fichier> et dis-moi combien pèse le modèle d'embedding.` | **Bonne réponse 2 fois sur 5** ; un outil de lecture n'est appelé que 6 fois sur 16, et 0 sur 11 après un listage |
+
+Quand le modèle ne lit pas le fichier, il répond qu'il ne peut pas accéder aux fichiers locaux.
+Ce n'est pas le contexte (1 841 tokens sur 4 096, et 8 192 n'y change rien) ni le nombre d'outils
+(pas mieux avec 3 outils). Une consigne dans le persona n'a pas aidé non plus : 1 fois sur 6.
+Le protocole, lui, fonctionne : `tests/test_mcp_client.py` appelle ce serveur directement.
 
 ## Scénario de démo
 
@@ -87,5 +101,14 @@ SENSIA: Cette semaine, ... (date) ... Sources : python.org/..., ...
 - **Résultats non textuels** : seuls les blocs de texte sont transmis au modèle.
 - **Variables d'environnement** : le serveur les reçoit toutes, y compris `LANGSEARCH_API_KEY`.
   Ne brancher qu'un serveur de confiance.
+- **Pas de confirmation sur les outils** : Sensia exécute sans rien demander tout appel du modèle
+  à un outil MCP, y compris `write_file` ou `move_file` de `server-filesystem`. Limiter ce serveur
+  à un dossier sans importance.
+- **Erreurs de protocole** : pour un outil inconnu du serveur, le modèle reçoit un message peu
+  parlant (`unhandled errors in a TaskGroup`), sans plantage.
+- **Lenteur** : chaque appel relance le serveur par `npx` (3 à 8 s pour `server-filesystem`, et
+  jusqu'à 100 s pour un message avec `server-everything`).
+- **Demandes de code** : avec des outils disponibles, une simple demande de code déclenche souvent
+  `web_search` (5 fois sur 6 avec le persona `sensia`), alors qu'aucune recherche n'est utile.
 - **Confidentialité** : la requête quitte la machine vers LangSearch, contrairement au reste
   de Sensia qui est entièrement local.

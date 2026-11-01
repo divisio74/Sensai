@@ -1,5 +1,4 @@
 import argparse
-import json
 import requests
 from dotenv import load_dotenv
 
@@ -19,24 +18,28 @@ from core.history import load_history, save_history
 MAX_TOOL_ROUNDS = CONFIG["chat"]["max_tool_rounds"]
 MAX_FAST_RUNS = CONFIG["chat"]["max_fast_runs"]
 TOOLS = []
+# a native tool: with `tools` in the request, Ollama swallows a tool-like JSON written as text
+FAST_TOOL = {
+    "type": "function",
+    "function": {
+        "name": "fast",
+        "description": "Run a task within a time limit. Only when the user's message states a number of seconds or minutes: never otherwise. The user confirms first.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "seconds": {"type": "number", "description": "The time limit, in seconds"},
+                "task": {"type": "string", "description": "The task, in the user's own words"},
+            },
+            "required": ["seconds", "task"],
+        },
+    },
+}
 
 
-def parse_json_reply(reply):
-    clean_reply = reply.strip("` \n")
-    if clean_reply.startswith("json"):
-        clean_reply = clean_reply[4:].strip()
+def fast_request(arguments):
+    task = arguments.get("task")
     try:
-        return json.loads(clean_reply)
-    except ValueError:
-        return None
-
-
-def fast_request(parsed):
-    if not isinstance(parsed, dict) or parsed.get("tool") != "fast":
-        return None
-    task = parsed.get("task")
-    try:
-        seconds = float(parsed.get("seconds"))
+        seconds = float(arguments.get("seconds"))
     except (TypeError, ValueError):
         return None
     if not isinstance(task, str) or not task.strip() or seconds <= 0:
@@ -92,9 +95,10 @@ def u_send_message_a(content, messages, model, url, persona):
     messages.append({"role": "user", "content": content})
     tool_rounds, fast_runs = 0, 0
     persona_name = get_persona_name(persona)
+    tools = TOOLS + [FAST_TOOL] if persona == "dev" else TOOLS
     while True:
         print(f"{persona_name}: ", end="", flush=True)
-        result = chat_with_tools(messages, model, url, TOOLS)
+        result = chat_with_tools(messages, model, url, tools)
         if result is None:
             messages.pop()
             return
@@ -104,17 +108,6 @@ def u_send_message_a(content, messages, model, url, persona):
             message["tool_calls"] = tool_calls
         messages.append(message)
 
-        request = fast_request(parse_json_reply(reply))
-        if request:
-            fast_runs += 1
-            if fast_runs > MAX_FAST_RUNS:
-                print("\n[Only one fast run per message, stopping]")
-                break
-            task, seconds = request
-            result = run_requested_fast(task, seconds, model, url, persona)
-            messages.append({"role": "user", "content": result})
-            continue
-
         if tool_calls:
             tool_rounds += 1
             if tool_rounds > MAX_TOOL_ROUNDS:
@@ -123,6 +116,18 @@ def u_send_message_a(content, messages, model, url, persona):
             for call in tool_calls:
                 name = call["function"]["name"]
                 arguments = call["function"]["arguments"]
+                if name == "fast":
+                    request = fast_request(arguments)
+                    fast_runs += 1
+                    if fast_runs > MAX_FAST_RUNS:
+                        print("\n[Only one fast run per message]")
+                        output = "Only one fast run per message. Answer the user with what you have."
+                    elif request:
+                        output = run_requested_fast(*request, model, url, persona)
+                    else:
+                        output = "Invalid arguments for 'fast': it needs a task and a number of seconds."
+                    messages.append({"role": "tool", "tool_name": name, "content": output})
+                    continue
                 print(f"\n[Tool {name}: {arguments}]")
                 try:
                     output = call_tool(name, arguments)
