@@ -9,6 +9,7 @@ from core.mcp_client import get_tools, call_tool
 from core.persona import load_persona, build_system_prompt, list_personas, load_user_profile
 from core.commands import handle_command
 from core.auth import login, register, profile_path
+from core.history import load_history, save_history
 
 HOST = CONFIG["web"]["host"]
 PORT = CONFIG["web"]["port"]
@@ -33,6 +34,10 @@ class LoginRequest(BaseModel):
 
 def context_usage():
     used = LAST_USAGE["prompt"] + LAST_USAGE["answer"]
+    if used == 0:
+        for message in messages:
+            used += len(message["content"])
+        used = used // 4
     if len(messages) == 1:
         used = 0
     return {"used": used, "max": CONFIG["generation"]["num_ctx"]}
@@ -45,8 +50,10 @@ def start_session(user):
     global CURRENT_USER
 
     CURRENT_USER = user
+    LAST_USAGE["prompt"] = 0
+    LAST_USAGE["answer"] = 0
     profile = load_user_profile(profile_path(user["email"]))
-    messages[:] = [build_system_prompt(load_persona(user["persona"]), profile)]
+    messages[:] = [build_system_prompt(load_persona(user["persona"]), profile)] + load_history(user["email"])
 
 @app.get("/")
 def home():
@@ -132,13 +139,18 @@ def stream_answer(text):
             messages.append({"role": "tool", "tool_name": name, "content": output})
     yield "\n[Too many tool calls, stopping]"
 
+def stream_and_save(text):
+    yield from stream_answer(text)
+    save_history(CURRENT_USER["email"], messages)
+
 @app.post("/api/chat")
 def api_chat(request: ChatRequest):
     check_logged_in()
     output = handle_command(request.text, messages, MODEL, OLLAMA_URL, CURRENT_USER)
     if output is not None:
+        save_history(CURRENT_USER["email"], messages)
         return {"output": output, "messages": messages[1:], "context": context_usage()}
-    return StreamingResponse(stream_answer(request.text), media_type="text/plain")
+    return StreamingResponse(stream_and_save(request.text), media_type="text/plain")
 
 def run(model, url, persona):
     global MODEL, OLLAMA_URL
