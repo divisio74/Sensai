@@ -38,7 +38,7 @@ démonstration ou pour lire plus confortablement des blocs de code.
 
 ## Hors périmètre
 
-- `/fast` et la recherche web ne sont disponibles que dans le terminal : dans la page, `/fast`
-  part vers le modèle comme un message ordinaire.
+- `/fast` n'est disponible que dans le terminal : dans la page, il part vers le modèle comme un
+  message ordinaire.
 - Une seule session : un seul compte connecté et une seule conversation, partagés par tous les
   onglets ouverts.

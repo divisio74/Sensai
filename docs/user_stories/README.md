@@ -36,7 +36,7 @@ Chaque story a des critères d'acceptation vérifiables : un message exact, une 
 | **R2** RAG avancé (score par extrait) | Ne recevoir que des extraits pertinents, avec leurs sources | [rag.md](rag.md) 2 | seuil `threshold`, scores et sources dans `rag/retrieve.py` | Scénario de démo (question hors sujet refusée) |
 | **T2** Exécution sandboxée | Recevoir du code qui tourne, sans mettre ma machine en danger | [code.md](code.md) 1, 3 | `tools/sandbox.py` (conteneur Docker), `core/code_extract.py` | 9 critères d'isolation testés un par un (`/home` vide, clé absente, réseau coupé...) ; `fib(42)` corrigé en 2 tentatives |
 | **A1** Boucle de raisonnement | Que l'agent corrige ses erreurs et ne tourne pas en rond | [code.md](code.md) 1, 2 | `core/boucle.py` (correction, détection de stagnation par AST) | README, *Measurements* : stagnation, 1 exécution au lieu de 3 |
-| **T1** MCP | Que le modèle choisisse lui-même l'outil à appeler | [web_search.md](web_search.md) 1 | `core/mcp_server.py`, `core/mcp_client.py`, `main.py` | Scénario de démo de la story |
+| **T1** MCP | Que le modèle choisisse lui-même l'outil à appeler | [web_search.md](web_search.md) 1 | `core/mcp_server.py`, `core/mcp_client.py`, `main.py`, `web.py` | Scénario de démo de la story |
 | **T3** Recherche web | Répondre sur l'actualité, avec des sources datées | [web_search.md](web_search.md) 1, 2 | outil `web_search` (LangSearch) | Scénario de démo de la story |
 | **X1** Interface web | Utiliser Sensia sans terminal | [web.md](web.md) 1, 2 | `web.py`, `web/` | Scénario de démo de la story |
 | **T5** Sortie structurée | Un plan fiable, que le code peut lire sans erreur | [dev.md](dev.md) 1 | schéma JSON imposé à Ollama (`timepred/plan.py`) | 36 classements sur 36 au format valide |

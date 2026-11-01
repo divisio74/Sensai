@@ -183,7 +183,7 @@ with the same code as the terminal.
 browser (web/index.html, css, js)          web.py (FastAPI)
    POST /api/chat {text}  ───────────────►  handle_command()  ──► /help, /clear, /rag, /code...
    ◄─────────────── {output, messages}  (JSON)
-                                             or stream_chat()  ──► Ollama
+                                             or stream_answer()  ──► Ollama (+ MCP tools)
    ◄─────────────── the answer, piece by piece  (text stream)
    GET /api/history  ────────────────────►  the conversation (to redraw it after a reload)
    POST /api/login, /api/register, /api/logout  ──►  core/auth.py, opens or closes the session
@@ -206,6 +206,12 @@ FastAPI `StreamingResponse`, and the page reads them with `response.body.getRead
 appears word by word instead of after several seconds of waiting. Commands still answer in JSON,
 so the page knows which kind of answer it gets from the `Content-Type` header.
 
+**The same tool-call loop as the terminal.** `stream_answer()` in `web.py` passes the MCP tools to
+the model. When the model asks for a tool, the server streams a `[Tool web_search: {...}]` line,
+runs the tool, adds its result as a `tool` message and asks the model again, at most
+`max_tool_rounds` times. If Ollama fails in the middle, the whole exchange is removed from the
+history.
+
 **HTML, CSS and plain JavaScript, no build step.** The page is served as-is by FastAPI: no
 Node.js, no compilation, one command to start everything. TypeScript or React would have brought
 type checking, at the cost of a toolchain far heavier than this interface needs.
@@ -214,7 +220,8 @@ type checking, at the cost of a toolchain far heavier than this interface needs.
 
 - The answers of `/rag`, `/code` and `/retry` are shown at once, not streamed.
 - Reloading the page while an answer is streaming loses that answer.
-- In the web, the chat does not pass the MCP tools to the model, so it cannot search the web.
+- The `[Tool ...]` line is only shown while the answer streams: once the page redraws the
+  conversation from the history, only the final answer stays.
 - `/fast` only works in the terminal: in the web, it is sent to the model as a plain message.
 - All browser tabs share the same conversation and the same account. There is no session cookie:
   the server remembers one logged-in account, for every browser that reaches it. Logging in again
@@ -360,7 +367,8 @@ a low temperature (0.1): the goal is to quote the documentation, not to improvis
 ## Web search (MCP)
 
 The web search is a tool exposed by an MCP server (`core/mcp_server.py`, `web_search`, backed
-by LangSearch). At start-up, `main.py` launches the server, lists its tools and passes them to
+by LangSearch). At start-up, the terminal (`main.py`) and the web server (`web.py`) launch the
+server, list its tools and pass them to
 Ollama in the `tools` field. **The model decides by itself** to call the tool, with a native
 tool call; Sensia runs it, returns the result as a `tool` message, and the model continues.
 
@@ -389,7 +397,6 @@ for a summary with dates, then the sources, never a bare list of links.
   This is the only external call; it needs a key in `.env` and can be avoided by not asking
   for recent information.
 - Each tool call starts the MCP server process again (about 1 s).
-- Not available in the web interface yet.
 
 ---
 
@@ -463,7 +470,7 @@ main.py                  CLI, chat history, command dispatch, tool-call loop
 ├── tools/sandbox.py     runs code in a subprocess  (run_python)
 ├── rag/                 ingest -> embed -> store -> retrieve
 ├── timepred/            /fast: plan, prediction, live budget, learning
-└── web.py               web server (--web), uses the same commands and stream_chat()
+└── web.py               web server (--web), same commands, streamed answers with MCP tools
 ```
 
 ### The reflection loop
